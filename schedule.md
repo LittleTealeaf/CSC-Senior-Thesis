@@ -8,6 +8,8 @@
 ## Week 2
 
 - [ ] Implement algorithm in Rust
+- [ ] Start drafting out paper template
+- [ ] Finalize semester schedule
 
 ### Due Dates
 
@@ -32,11 +34,16 @@
 
 - [ ] Ctd. implement algorithm in Tensorflow
 - [ ] Run experiments and collect data
-- [ ] Create graphs and analyze results
+- [ ] Create graphs and analyze results (Probably in R)
 
 ## Week 7
 
+- [ ] Buffer zone for implementing tasks
+
 ## Week 8
+
+- [ ] Write results section
+- [ ] Write materials and methods
 
 ## Week 9
 
