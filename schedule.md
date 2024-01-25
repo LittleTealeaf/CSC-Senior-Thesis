@@ -30,4 +30,6 @@
 
 ### Due this week
 
+- [ ] Final Paper / Presentation
+
 ## Week 14
