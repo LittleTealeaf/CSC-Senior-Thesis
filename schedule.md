@@ -3,35 +3,38 @@
 ## Week 1
 
 - [ ] Decide algorithm to implement
-    - Should be sufficiently parallel
+  - Should be sufficiently parallel
 
 ## Week 2
 
 - [ ] Implement algorithm in Rust
-- [ ] Outline methods section in thesis
+
+### Due Dates
+
+- [ ] Semester Schedule: February 2nd
 
 ## Week 3
 
+- [ ] Ctd. implement algorithm in Rust
 - [ ] Implement algorithm in CUDA
 
 ## Week 4
 
+- [ ] Ctd. implement algorithm in CUDA
 - [ ] Implement algorithm in Python
 
 ## Week 5
 
+- [ ] Ctd. implement algorithm in Python
 - [ ] Implement algorithm in Tensorflow
-- [ ] Run tests and collect data
 
 ## Week 6
 
-- [ ] Analyze Data
-- [ ] Create graphics / diagrams
-- [ ] Write results section
+- [ ] Ctd. implement algorithm in Tensorflow
+- [ ] Run experiments and collect data
+- [ ] Create graphs and analyze results
 
 ## Week 7
-
-- [ ] Write abstract
 
 ## Week 8
 
@@ -45,8 +48,11 @@
 
 ## Week 13
 
-### Due this week
-
-- [ ] Final Paper / Presentation
-
 ## Week 14
+
+# Due Dates
+
+- Poster Draft: April 22nd
+- Paper Draft: May 1st
+- Final Poster: April 29th
+- Final Paper: May 10th
