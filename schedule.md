@@ -2,6 +2,8 @@
 
 ## Week 1
 
+- [ ] Decide algorithm to implement
+
 ## Week 2
 
 ## Week 3
