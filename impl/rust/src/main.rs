@@ -1,9 +1,17 @@
 use std::time::SystemTime;
 
+use rand::{thread_rng, Rng};
+
 fn main() {
+    let mut rng = thread_rng();
+
     let start = SystemTime::now();
-    println!("Hello");
+
+    for _ in 0..1_000_000 {
+        let _i: i64 = rng.gen();
+    }
+
     let elapsed = start.elapsed().unwrap();
 
-    println!("{}", elapsed.as_nanos());
+    println!("{}", elapsed.as_millis());
 }
