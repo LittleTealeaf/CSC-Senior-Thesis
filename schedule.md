@@ -1,65 +1,86 @@
 # Senior Thesis Schedule
 
-## Week 1
+- Action items labeled with `(Start)` are items that should be started if time permits during that week
+
+Languages to implement
+
+- Rust
+- Python
+- Python (Tensorflow)
+- CUDA
+
+## Week of Jan 28
 
 - [ ] Decide algorithm to implement
-  - Should be sufficiently parallel
+  - Should be sufficiently parallelizable
+  - Either feed forward or back propagation for neural netwokrs
+- [ ] Complete Schedule
 
-## Week 2
+## Week of Feb 4
 
-- [ ] Implement algorithm in Rust
-- [ ] Start drafting out paper template
-- [ ] Finalize semester schedule
+- [ ] Finalize experimentation strategy
+- [ ] Draft Abstract
+- [ ] Rough Outline Methods Section
+  - Draft out points for algorithms used, data sources, experimentation plan
 
-### Due Dates
+## Week of Feb 11
 
-- [ ] Semester Schedule: February 2nd
+- [ ] Draft Methods Section
+- [ ] Implement Algorithm in Rust
 
-## Week 3
+## Week of Feb 18
 
-- [ ] Ctd. implement algorithm in Rust
-- [ ] Implement algorithm in CUDA
+- [ ] Implement Algorithm in Python (Tensorflow)
 
-## Week 4
+## Week of Feb 25
 
-- [ ] Ctd. implement algorithm in CUDA
-- [ ] Implement algorithm in Python
+- [ ] Draft data analysis code (R or Python)
+  - Code to interpret results and output graphs
+- [ ] Implement Algorithm in Python
 
-## Week 5
+## Week of Mar 3
 
-- [ ] Ctd. implement algorithm in Python
-- [ ] Implement algorithm in Tensorflow
+- [ ] Implement Algorithm in CUDA
 
-## Week 6
+## Week of Mar 10
 
-- [ ] Ctd. implement algorithm in Tensorflow
-- [ ] Run experiments and collect data
-- [ ] Create graphs and analyze results (Probably in R)
+- _Buffer Week for Implementations_
+- [ ] Debug and run experiment tests
 
-## Week 7
+## Week of Mar 17
 
-- [ ] Buffer zone for implementing tasks
+- [ ] Run implementations and collect data
+- [ ] Analyze and interpret results
 
-## Week 8
+## Week of Mar 24
 
-- [ ] Write results section
-- [ ] Write materials and methods
+- [ ] Draft Results
+- [ ] Create graphs and data snippets for results
 
-## Week 9
+## Week of Mar 31
 
-## Week 10
+- [ ] Draft Poster
+- [ ] Draft Discussion
 
-## Week 11
+## Week of Apr 7
 
-## Week 12
+- [ ] **Due Mid April**: Poster for Conference
+- [ ] Finalize Poster
 
-## Week 13
+## Week of Apr 14
 
-## Week 14
+- [ ] Ctd. work on Paper
 
-# Due Dates
+## Week of Apr 21
 
-- Poster Draft: April 22nd
-- Paper Draft: May 1st
-- Final Poster: April 29th
-- Final Paper: May 10th
+- [ ] Ctd. work on Paper
+- [ ] **Due Apr 22**: Poster Draft
+
+## Week of Apr 28
+
+- [ ] **Due Apr 29**: Final Poster
+- [ ] **Due May 1**: Paper Draft
+
+## Week of May 5
+
+- [ ] **Due May 10**: Final Paper
