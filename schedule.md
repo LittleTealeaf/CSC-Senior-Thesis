@@ -14,7 +14,7 @@ Languages to implement
 - [ ] Decide algorithm to implement
   - Should be sufficiently parallelizable
   - Either feed forward or back propagation for neural netwokrs
-- [ ] Complete Schedule
+- [x] Complete Schedule
 
 ## Week of Feb 4
 
