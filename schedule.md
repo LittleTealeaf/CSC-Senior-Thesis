@@ -11,7 +11,7 @@ Languages to implement
 
 ## Week of Jan 28
 
-- [ ] Decide algorithm to implement
+- [x] Decide algorithm to implement - **Convolutional Neural Network (Training)**
   - Should be sufficiently parallelizable
   - Either feed forward or back propagation for neural netwokrs
 - [x] Complete Schedule
