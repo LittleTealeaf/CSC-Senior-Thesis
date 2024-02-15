@@ -2,17 +2,20 @@ from random import Random
 
 random = Random()
 
-VARIABLES = 10
+VARIABLES = 100
 OBSERVATIONS = 1000
 BOOTSTRAP_SAMPLES = 1000
-BOOTSTRAP_SIZE = 1000
+BOOTSTRAP_SIZE = 100
 
-LAYERS = [20, 10, 10]
+LAYERS = [50,40,30,20,10]
 
 
 # Generate Data
+print("Generating Data")
+
 def generate_row():
-    return [random.random() for _ in range(VARIABLES)]
+    # First one is the expected output
+    return [random.random() for _ in range(VARIABLES + 1)]
 
 
 data = [generate_row() for _ in range(OBSERVATIONS)]
@@ -26,6 +29,7 @@ def generate_bootstrap():
 
 
 # Generate Bootstraps
+print("Generating Bootstraps")
 
 bootstraps = [generate_bootstrap() for _ in range(BOOTSTRAP_SAMPLES)]
 
@@ -34,6 +38,7 @@ with open("bootstraps.csv", "w") as file:
 
 
 # Generate Neural Network
+print("Generating Neural Network")
 
 LAYERS.append(1)
 

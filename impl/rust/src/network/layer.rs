@@ -1,9 +1,11 @@
+use super::activation::Activation;
+
 #[derive(Clone, Debug)]
 pub struct Layer {
     pub input: usize,
     pub output: usize,
     pub bias: Vec<f64>,
-    pub weights: Vec<Vec<f64>>,
+    pub weights: Vec<f64>,
 }
 
 impl Layer {
@@ -20,7 +22,7 @@ impl Layer {
             .filter_map(|num| num.parse().ok())
             .collect();
         let weights = lines
-            .map(|line| line.split(',').filter_map(|num| num.parse().ok()).collect())
+            .flat_map(|line| line.split(',').filter_map(|num| num.parse().ok()))
             .collect();
 
         Some(Self {
@@ -29,5 +31,21 @@ impl Layer {
             bias,
             weights,
         })
+    }
+
+    pub fn feed_forward(&self, input: Vec<f64>) -> Vec<f64> {
+        let mut output = self.bias.clone();
+        for j in 0..self.output {
+            (0..self.input).for_each(|i| {
+                output[j] += input[i] * self.weights[self.get_weights_index(i, j)];
+            });
+            output[j] = output[j].activation();
+        }
+        output
+    }
+
+    #[inline(always)]
+    fn get_weights_index(&self, input: usize, output: usize) -> usize {
+        input * self.output + output
     }
 }
