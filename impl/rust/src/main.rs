@@ -1,3 +1,7 @@
+#![allow(dead_code)]
+
+mod network;
+
 use std::time::SystemTime;
 
 use rand::{thread_rng, Rng};
