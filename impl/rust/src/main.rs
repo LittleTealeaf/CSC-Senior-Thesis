@@ -30,7 +30,7 @@ fn main() {
 
         let start = SystemTime::now();
 
-        network.train(data);
+        network.train(data, &0.1);
 
         let elapsed = start.elapsed().unwrap();
         times.push(elapsed.as_nanos());

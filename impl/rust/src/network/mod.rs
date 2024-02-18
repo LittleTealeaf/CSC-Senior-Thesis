@@ -1,3 +1,5 @@
+use std::ops::MulAssign;
+
 use self::layer::Layer;
 use rayon::prelude::*;
 
@@ -23,17 +25,78 @@ impl NeuralNetwork {
         }
     }
 
-    pub fn train<'a, I>(&mut self, data: I)
+    pub fn train<'a, I>(&mut self, data: I, alpha: &f64)
     where
-        I: IntoParallelIterator<Item = &'a Vec<f64>>,
+        I: IntoIterator<Item = &'a Vec<f64>>,
+        I::IntoIter: ExactSizeIterator + Sized + Send,
     {
-        let nudges = data
-            .into_par_iter()
-            .map(|data| self.back_propagate(&data[1..], &data[0]))
-            .collect::<Vec<_>>();
+        let iterator = data.into_iter();
+        let count = iterator.len();
+
+        let alpha = alpha / count as f64;
+
+        let nudges = iterator
+            .par_bridge()
+            .map(|data| (self.back_propagate(&data[1..], &data[0], &alpha)))
+            .reduce(Vec::new, |mut a, b| {
+                if a.is_empty() {
+                    b
+                } else if b.is_empty() {
+                    a
+                } else {
+                    for (i, layer) in b.into_iter().enumerate() {
+                        a[i] += layer
+                    }
+                    a
+                }
+            });
+
+        for (index, layer) in nudges.into_iter().enumerate() {
+            self.layers[index] += layer * (1f64 / count as f64);
+        }
     }
 
-    fn back_propagate(&self, input: &[f64], expected: &f64) -> Vec<Layer> {
-        todo!()
+    fn back_propagate(&self, input: &[f64], expected: &f64, alpha: &f64) -> Vec<Layer> {
+        struct Entry<'a> {
+            inputs: Vec<f64>,
+            outputs: Vec<f64>,
+            layer: &'a Layer,
+        }
+
+        let mut entries = Vec::with_capacity(self.layers.len());
+        let mut inputs = input.to_vec();
+
+        for layer in &self.layers {
+            let outputs = layer.feed_forward(inputs.clone());
+            entries.push(Entry {
+                inputs,
+                outputs: outputs.clone(),
+                layer,
+            });
+            inputs = outputs;
+        }
+
+        let mut nudges = Vec::new();
+
+        let mut errors = vec![*expected];
+
+        while let Some(Entry {
+            inputs,
+            outputs,
+            layer,
+        }) = entries.pop()
+        {
+            let (nudge, new_errors) = layer.back_propagate(&inputs, &outputs, &errors);
+            errors = new_errors;
+            nudges.push(nudge);
+        }
+
+        for nudge in &mut nudges {
+            nudge.mul_assign(*alpha);
+        }
+
+        nudges.reverse();
+
+        nudges
     }
 }

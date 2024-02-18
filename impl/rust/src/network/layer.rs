@@ -60,10 +60,25 @@ impl Layer {
         input * self.output + output
     }
 
-    pub fn back_propagate(&self, input: &[f64], output: &[f64], errors: &[f64]) -> (Layer, Vec<f64>) {
-        todo!()
+    pub fn back_propagate(
+        &self,
+        input: &[f64],
+        output: &[f64],
+        errors: &[f64],
+    ) -> (Layer, Vec<f64>) {
+        let mut nudge = self.copy_size();
+        let mut new_errors = vec![0f64; self.input];
+        for j in 0..self.output {
+            let error = output[j].activation_derivative() * errors[j];
+            (0..self.input).for_each(|i| {
+                let index = self.get_weights_index(i, j);
+                new_errors[j] += error * self.weights[index];
+                nudge.weights[index] += input[i] * error;
+            });
+            nudge.bias[j] += error;
+        }
+        (nudge, new_errors)
     }
-
 }
 
 impl Add for Layer {
