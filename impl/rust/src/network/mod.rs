@@ -1,8 +1,8 @@
 use self::layer::Layer;
 use rayon::prelude::*;
 
-mod layer;
 mod activation;
+mod layer;
 
 #[derive(Clone, Debug)]
 pub struct NeuralNetwork {
@@ -23,7 +23,17 @@ impl NeuralNetwork {
         }
     }
 
-    pub fn train<'a>(&mut self, data: impl IntoParallelIterator<Item = &'a Vec<f64>>) {
-        data.into_par_iter().map(|_data| 0f64).collect::<Vec<_>>();
+    pub fn train<'a, I>(&mut self, data: I)
+    where
+        I: IntoParallelIterator<Item = &'a Vec<f64>>,
+    {
+        let nudges = data
+            .into_par_iter()
+            .map(|data| self.back_propagate(&data[1..], &data[0]))
+            .collect::<Vec<_>>();
+    }
+
+    fn back_propagate(&self, input: &[f64], expected: &f64) -> Vec<Layer> {
+        todo!()
     }
 }

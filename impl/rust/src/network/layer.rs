@@ -1,3 +1,5 @@
+use std::ops::{Add, AddAssign, Mul, MulAssign};
+
 use super::activation::Activation;
 
 #[derive(Clone, Debug)]
@@ -33,6 +35,15 @@ impl Layer {
         })
     }
 
+    pub fn copy_size(&self) -> Self {
+        Self {
+            input: self.input,
+            output: self.output,
+            weights: vec![0f64; self.input * self.output],
+            bias: vec![0f64; self.output],
+        }
+    }
+
     pub fn feed_forward(&self, input: Vec<f64>) -> Vec<f64> {
         let mut output = self.bias.clone();
         for j in 0..self.output {
@@ -47,5 +58,54 @@ impl Layer {
     #[inline(always)]
     fn get_weights_index(&self, input: usize, output: usize) -> usize {
         input * self.output + output
+    }
+
+    pub fn back_propagate(&self, input: &[f64], output: &[f64], errors: &[f64]) -> (Layer, Vec<f64>) {
+        todo!()
+    }
+
+}
+
+impl Add for Layer {
+    type Output = Self;
+    fn add(mut self, rhs: Self) -> Self::Output {
+        self += rhs;
+        self
+    }
+}
+
+impl AddAssign for Layer {
+    fn add_assign(&mut self, rhs: Self) {
+        assert!(self.output == rhs.output);
+        assert!(self.input == rhs.input);
+
+        for i in 0..self.output {
+            self.bias[i] += rhs.bias[i];
+
+            for j in 0..self.input {
+                let index = self.get_weights_index(j, i);
+                self.weights[index] += rhs.weights[index];
+            }
+        }
+    }
+}
+
+impl Mul<f64> for Layer {
+    type Output = Self;
+    fn mul(mut self, rhs: f64) -> Self::Output {
+        self *= rhs;
+        self
+    }
+}
+
+impl MulAssign<f64> for Layer {
+    fn mul_assign(&mut self, rhs: f64) {
+        for o in 0..self.output {
+            self.bias[o] *= rhs;
+            for i in 0..self.output {
+                let index = self.get_weights_index(o, i);
+                self.weights[index] *= rhs;
+            }
+        }
     }
 }
