@@ -18,9 +18,9 @@ Languages to implement
 
 ## Week of Feb 4
 
-- [ ] Finalize experimentation strategy
-- [ ] Draft Abstract
-- [ ] Rough Outline Methods Section
+- [x] Finalize experimentation strategy
+- [x] Draft Abstract
+- [x] Rough Outline Methods Section
   - Draft out points for algorithms used, data sources, experimentation plan
 
 ## Week of Feb 11
