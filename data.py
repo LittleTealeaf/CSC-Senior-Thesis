@@ -1,17 +1,27 @@
 from random import Random
 
+import shutil
+import os
+import tomllib
+
 random = Random()
 
-VARIABLES = 200
-OBSERVATIONS = 1000
-BOOTSTRAP_SAMPLES = 1000
-BOOTSTRAP_SIZE = 1000
+with open("data.toml", "rb") as file:
+    config = tomllib.load(file)
 
-LAYERS = [200,175,150,125,100,75,50,25]
+VARIABLES = config['variables']
+OBSERVATIONS = config['observations']
+BOOTSTRAP_SAMPLES = config['samples']
+BOOTSTRAP_SIZE = config['bootstrap']
+LAYERS = config['layers']
 
+if os.path.exists("data"):
+    shutil.rmtree("data")
+os.mkdir("data")
 
 # Generate Data
 print("Generating Data")
+
 
 def generate_row():
     # First one is the expected output
@@ -20,7 +30,7 @@ def generate_row():
 
 data = [generate_row() for _ in range(OBSERVATIONS)]
 
-with open("data.csv", "w") as file:
+with open("data/data.csv", "w") as file:
     file.write("\n".join([",".join([str(i) for i in row]) for row in data]))
 
 
@@ -33,7 +43,7 @@ print("Generating Bootstraps")
 
 bootstraps = [generate_bootstrap() for _ in range(BOOTSTRAP_SAMPLES)]
 
-with open("bootstraps.csv", "w") as file:
+with open("data/bootstraps.csv", "w") as file:
     file.write("\n".join([",".join([str(i) for i in row]) for row in bootstraps]))
 
 
@@ -46,7 +56,7 @@ layer_sizes = [i for i in LAYERS]
 layer_sizes.insert(0, VARIABLES)
 
 
-with open("network", "w") as file:
+with open("data/network", "w") as file:
     for i in range(len(LAYERS)):
         size_in = layer_sizes[i]
         size_out = layer_sizes[i + 1]
