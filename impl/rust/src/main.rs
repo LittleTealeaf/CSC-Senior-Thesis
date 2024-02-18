@@ -36,5 +36,9 @@ fn main() {
         times.push(elapsed.as_nanos());
     }
 
-    println!("{:?}", times);
+    println!("id,time");
+
+    for (i, time) in times.into_iter().enumerate() {
+        println!("{i},{time}");
+    }
 }
