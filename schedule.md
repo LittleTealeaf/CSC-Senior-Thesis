@@ -26,7 +26,7 @@ Languages to implement
 ## Week of Feb 11
 
 - [ ] Draft Methods Section
-- [ ] Implement Algorithm in Rust
+- [x] Implement Algorithm in Rust
 
 ## Week of Feb 18
 
