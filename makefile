@@ -15,7 +15,7 @@ impl/cuda/executable: impl/cuda/src
 	nvcc impl/cuda/src/main.cu -o impl/cuda/executable
 
 impl/cuda/results.csv: data impl/cuda/executable
-	RESULTS_PATH="impl/cuda/results.csv" ./impl/cuda/executable
+	RESULTS_PATH="impl/cuda/results.csv" ./impl/cuda/executable > impl/cuda/results.csv
 
 # Misc.
 data: data.toml
