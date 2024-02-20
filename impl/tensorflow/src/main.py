@@ -12,6 +12,16 @@ def convert_string_to_tensor(string: str, name: str):
     return tf.Variable(tf.convert_to_tensor(np_array, dtype=tf.float64), name=name)
 
 
+@tf.function
+def feed_forward(inputs, layers):
+    variables = inputs
+    for weights, biases in layers:
+        variables = variables @ weights
+        variables = variables + biases
+        variables = keras.activations.relu(variables)
+    return variables
+
+
 class Network:
     def __init__(self, file_name: str) -> None:
         self.layers = []
@@ -41,11 +51,11 @@ class Network:
         input_variables = tf.Variable(inputs)
 
         with tf.GradientTape() as tape:
-            variables = input_variables
-            for weights, biases in self.layers:
-                variables = variables @ weights
-                variables = variables + biases
-                variables = keras.activations.relu(variables)
+            variables = feed_forward(input_variables, self.layers)
+            # for weights, biases in self.layers:
+            #     variables = variables @ weights
+            #     variables = variables + biases
+            #     variables = keras.activations.relu(variables)
             loss = tf.reshape(variables, (len(inputs),)) - expected_outputs
             loss = tf.math.square(loss)
             loss_mean = tf.reduce_mean(loss)
