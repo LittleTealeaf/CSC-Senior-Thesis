@@ -1,10 +1,10 @@
 #include "cuda_runtime.h"
 
 #include <chrono>
+#include <iostream>
 #include <cuda_device_runtime_api.h>
 #include <cuda_runtime_api.h>
 #include <driver_types.h>
-#include <iostream>
 
 using namespace std;
 
@@ -49,6 +49,11 @@ int main() {
                 .count()
          << endl;
   }
+
+
+
+
+
 
   return 0;
 }

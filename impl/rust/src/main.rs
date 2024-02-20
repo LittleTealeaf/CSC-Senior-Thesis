@@ -3,7 +3,7 @@
 mod network;
 mod utils;
 
-use std::time::SystemTime;
+use std::{env, fs::OpenOptions, io::Write, time::SystemTime};
 
 use network::NeuralNetwork;
 
@@ -36,9 +36,15 @@ fn main() {
         times.push(elapsed.as_nanos());
     }
 
-    println!("id,time");
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(env::var("RESULTS_PATH").unwrap())
+        .unwrap();
+
+    file.write_all("id,time".as_bytes()).unwrap();
 
     for (i, time) in times.into_iter().enumerate() {
-        println!("{i},{time}");
+        writeln!(&mut file, "{i},{time}").unwrap();
     }
 }
