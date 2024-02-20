@@ -6,7 +6,7 @@ clean:
 
 # Rust Executable
 
-impl/rust/target/release/rust-impl: data impl/rust/src/*.rs
+impl/rust/target/release/rust-impl: data impl/rust/src
 	cd impl/rust && cargo build --release
 
 impl/rust/results.csv: impl/rust/target/release/rust-impl
