@@ -86,9 +86,11 @@ print("Network: Created")
 
 times = []
 
-for bootstrap in BOOTSTRAPS:
+for i, bootstrap in enumerate(BOOTSTRAPS):
     inputs = np.array([DATA[i][0] for i in bootstrap])
     expected = np.array([DATA[i][1] for i in bootstrap])
+
+    print(f"Iter {i}")
 
     start = time.time_ns()
 
