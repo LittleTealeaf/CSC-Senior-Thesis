@@ -17,7 +17,6 @@ impl/cuda/executable: impl/cuda/src
 impl/cuda/results.csv: data impl/cuda/executable
 	./impl/cuda/executable > impl/cuda/results.csv
 
-
 # Misc.
 data: data.toml
 	python3 data.py
