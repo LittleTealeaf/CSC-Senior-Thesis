@@ -8,7 +8,7 @@ impl/rust/results.csv: impl/rust/target/release/rust-impl
 
 # Tensorflow
 impl/tensorflow/results.csv: impl/tensorflow/src data
-	RESULTS_PATH="impl/tensorflow/results.csv" python3 impl/tensorflow/src/main.py
+	RESULTS_PATH="impl/tensorflow/results.csv" PROJECT_ROOT="true" python3 impl/tensorflow/src/main.py
 
 # CUDA
 impl/cuda/executable: impl/cuda/src

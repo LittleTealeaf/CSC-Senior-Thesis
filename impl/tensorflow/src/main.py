@@ -1,8 +1,106 @@
 import os
-from network import Network
+import numpy as np
+import tensorflow as tf
+import keras
+import time
 
-network = Network("./data/network")
+
+def convert_string_to_tensor(string: str, name: str):
+
+    np_array = np.fromstring(string, dtype=np.float64, sep=",")
+
+    return tf.Variable(tf.convert_to_tensor(np_array, dtype=tf.float64), name=name)
+
+
+class Network:
+    def __init__(self, file_name: str) -> None:
+        self.layers = []
+        self.trainable_variables = []
+
+        # Loads data from the file into the layers and train
+        with open(file_name) as file:
+            sections = file.read().split("\n\n")
+
+            for i, section in enumerate(sections):
+                lines = section.splitlines()
+
+                if len(lines) == 0:
+                    continue
+
+                lines.pop(0)
+                biases = convert_string_to_tensor(lines.pop(0), f"{i}-bias")
+                weights = [
+                    convert_string_to_tensor(string, f"{i}-{j}-weight")
+                    for j, string in enumerate(lines)
+                ]
+                self.trainable_variables.append(biases)
+                self.trainable_variables.extend(weights)
+                self.layers.append((weights, biases))
+
+    def back_propagate(self, inputs, expected_outputs, alpha):
+        input_variables = tf.Variable(inputs)
+
+        with tf.GradientTape() as tape:
+            variables = input_variables
+            for weights, biases in self.layers:
+                variables = variables @ weights
+                variables = variables + biases
+                variables = keras.activations.relu(variables)
+            loss = tf.reshape(variables, (len(inputs),)) - expected_outputs
+            loss = tf.math.square(loss)
+            loss_mean = tf.reduce_mean(loss)
+
+            grad = tape.gradient(loss_mean, self.trainable_variables)
+
+            optimizer = keras.optimizers.SGD(learning_rate=alpha)
+
+            optimizer.apply_gradients(zip(grad, self.trainable_variables))
+
+
+#################################################################
+
+RELATIVE = "./" if "PROJECT_ROOT" in os.environ else "../../../"
+
+print("Data: Begin Loading")
+with open(f"{RELATIVE}data/data.csv") as file:
+    lines = file.readlines()
+    DATA = []
+    for line in lines:
+        line_data = np.fromstring(line, dtype=np.float64, sep=",")
+        expected = np.array(line_data[0], dtype=np.float64)
+        variables = np.array(line_data[1:], dtype=np.float64)
+        DATA.append((variables, expected))
+print("Data: Loaded")
+
+print("Bootstraps: Begin Loading")
+with open(f"{RELATIVE}data/bootstraps.csv") as file:
+    lines = file.readlines()
+    BOOTSTRAPS = [[int(i) for i in line.split(",")] for line in lines]
+print("Bootstraps: Loaded")
+
+
+print("Network: Begin Creating")
+network = Network(f"{RELATIVE}data/network")
+print("Network: Created")
+
+
+times = []
+
+for bootstrap in BOOTSTRAPS:
+    inputs = np.array([DATA[i][0] for i in bootstrap])
+    expected = np.array([DATA[i][1] for i in bootstrap])
+
+    start = time.time_ns()
+
+    network.back_propagate(inputs, expected, 0.1)
+
+    end = time.time_ns()
+
+    elapsed = end - start
+
+    times.append(elapsed)
 
 
 with open(os.environ["RESULTS_PATH"], "w") as file:
-    file.writelines(["id,time"])
+    data = ["id,time", *[f"\n{index},{elapsed}" for index, elapsed in enumerate(times)]]
+    file.writelines(data)

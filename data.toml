@@ -4,8 +4,14 @@
 # bootstrap = 1000
 # layers = [200, 175, 150, 125, 100, 75, 50, 25]
 
-variables = 100
-observations = 1000
-samples = 500
-bootstrap = 100
-layers = [100, 100, 100]
+# variables = 100
+# observations = 1000
+# samples = 500
+# bootstrap = 100
+# layers = [100, 100, 100]
+
+variables = 5
+observations = 10
+samples = 10
+bootstrap = 10
+layers = [5, 5, 5]
