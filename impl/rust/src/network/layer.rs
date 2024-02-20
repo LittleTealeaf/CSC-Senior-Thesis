@@ -11,6 +11,7 @@ pub struct Layer {
 }
 
 impl Layer {
+    #[inline(always)]
     pub fn from_str(input: &str) -> Option<Self> {
         let mut lines = input.lines();
         let mut dims = lines.next()?.split(' ');
@@ -35,6 +36,7 @@ impl Layer {
         })
     }
 
+    #[inline(always)]
     pub fn copy_size(&self) -> Self {
         Self {
             input: self.input,
