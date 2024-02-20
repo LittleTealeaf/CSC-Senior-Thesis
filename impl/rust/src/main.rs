@@ -39,6 +39,7 @@ fn main() {
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
+        .truncate(true)
         .open(env::var("RESULTS_PATH").unwrap())
         .unwrap();
 
