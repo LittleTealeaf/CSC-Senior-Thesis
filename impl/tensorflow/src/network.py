@@ -2,14 +2,11 @@ import tensorflow as tf
 import numpy as np
 
 
-def convert_string_to_tensor(string):
-    return tf.convert_to_tensor(
-        np.array(
-            tf.strings.split(tf.convert_to_tensor(string), sep=",").numpy(),
-            dtype="float64",
-        )
-    )
+def convert_string_to_tensor(string: str):
 
+    np_array = np.fromstring(string, dtype=np.float64, sep=",")
+
+    return tf.convert_to_tensor(np_array, dtype=tf.float64)
 
 class Network:
     def __init__(self, file_name: str) -> None:
