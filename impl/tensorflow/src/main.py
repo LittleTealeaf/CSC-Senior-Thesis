@@ -14,6 +14,7 @@ def convert_string_to_tensor(string: str, name: str):
 
 @tf.function
 def feed_forward(inputs, layers):
+    print("Traced Feed Forward")
     variables = inputs
     for weights, biases in layers:
         variables = variables @ weights
@@ -48,10 +49,9 @@ class Network:
                 self.layers.append((weights, biases))
 
     def back_propagate(self, inputs, expected_outputs, alpha):
-        input_variables = tf.Variable(inputs)
 
         with tf.GradientTape() as tape:
-            variables = feed_forward(input_variables, self.layers)
+            variables = feed_forward(inputs, self.layers)
             # for weights, biases in self.layers:
             #     variables = variables @ weights
             #     variables = variables + biases
@@ -99,6 +99,8 @@ times = []
 for i, bootstrap in enumerate(BOOTSTRAPS):
     inputs = np.array([DATA[i][0] for i in bootstrap])
     expected = np.array([DATA[i][1] for i in bootstrap])
+
+    inputs = tf.constant(inputs)
 
     print(f"Iter {i}")
 
