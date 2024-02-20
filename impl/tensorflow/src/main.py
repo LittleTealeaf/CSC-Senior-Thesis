@@ -13,8 +13,8 @@ def convert_string_to_tensor(string: str, name: str):
 
 
 @tf.function
-def feed_forward(inputs, layers):
-    print("Traced Feed Forward")
+def feed_forward_tf(inputs, layers):
+    print("Trace Feed Forward")
     variables = inputs
     for weights, biases in layers:
         variables = variables @ weights
@@ -22,6 +22,14 @@ def feed_forward(inputs, layers):
         variables = keras.activations.relu(variables)
     return variables
 
+
+@tf.function
+def back_prop_loss_tf(inputs, expected, layers):
+    print("Trace Back Propagation Loss")
+    variables = feed_forward_tf(inputs, layers)
+    loss = tf.reshape(variables, (len(inputs),)) - expected
+    loss = tf.math.square(loss)
+    return tf.reduce_mean(loss)
 
 class Network:
     def __init__(self, file_name: str) -> None:
@@ -51,16 +59,10 @@ class Network:
     def back_propagate(self, inputs, expected_outputs, alpha):
 
         with tf.GradientTape() as tape:
-            variables = feed_forward(inputs, self.layers)
-            # for weights, biases in self.layers:
-            #     variables = variables @ weights
-            #     variables = variables + biases
-            #     variables = keras.activations.relu(variables)
-            loss = tf.reshape(variables, (len(inputs),)) - expected_outputs
-            loss = tf.math.square(loss)
-            loss_mean = tf.reduce_mean(loss)
 
-            grad = tape.gradient(loss_mean, self.trainable_variables)
+            loss = back_prop_loss_tf(inputs, expected_outputs, self.layers)
+
+            grad = tape.gradient(loss, self.trainable_variables)
 
             optimizer = keras.optimizers.SGD(learning_rate=alpha)
 
