@@ -12,6 +12,11 @@ def convert_string_to_tensor(string: str, name: str):
     return tf.Variable(tf.convert_to_tensor(np_array, dtype=tf.float64), name=name)
 
 
+
+# WARNING:tensorflow:6 out of the last 6 calls to <function _BaseOptimizer._update_step_xla at 0x7f3f60153a60> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different
+#  shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracin
+# g and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
+
 @tf.function
 def feed_forward_tf(inputs, layers):
     print("Trace Feed Forward")
