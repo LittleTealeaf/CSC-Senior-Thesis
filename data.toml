@@ -1,15 +1,8 @@
-variables = 10
+variables = 200
 observations = 1000
-samples = 10
-bootstrap = 100
-layers = [50, 50, 50, 50]
-
-
-# variables = 200
-# observations = 1000
-# samples = 1000
-# bootstrap = 1000
-# layers = [200, 175, 150, 125, 100, 75, 50, 25]
+samples = 1000
+bootstrap = 1000
+layers = [200, 175, 150, 125, 100, 75, 50, 25]
 
 # variables = 100
 # observations = 1000
