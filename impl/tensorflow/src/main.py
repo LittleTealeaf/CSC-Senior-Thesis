@@ -9,12 +9,14 @@ PROJECT_ROOT = "." if "PROJECT_ROOT" in os.environ else "../../.."
 
 
 def string_to_tensor(string: str):
+    "Converts a comma separated string of variables into a Tensor"
     return tf.convert_to_tensor(
         np.fromstring(string, dtype=np.float64, sep=","), dtype=tf.float64
     )
 
 
 def load_network(file_name: str):
+    "Loads the network from a given file"
     layers = []
     with open(file_name) as file:
         sections = file.read().split("\n\n")
@@ -32,8 +34,6 @@ def load_network(file_name: str):
                 name=f"{i}-weights",
             )
 
-            # trainable_variables.append(biases)
-            # trainable_variables.extend(weights)
             layers.append((weights, biases))
     return layers
 
