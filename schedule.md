@@ -30,7 +30,7 @@ Languages to implement
 
 ## Week of Feb 18
 
-- [ ] Implement Algorithm in Python (Tensorflow)
+- [x] Implement Algorithm in Python (Tensorflow)
 
 ## Week of Feb 25
 
