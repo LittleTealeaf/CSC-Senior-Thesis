@@ -1,4 +1,3 @@
-# TODO: Copy over other file. No more classes, we just use @tf.function and functions now
 import os
 import numpy as np
 import tensorflow as tf
