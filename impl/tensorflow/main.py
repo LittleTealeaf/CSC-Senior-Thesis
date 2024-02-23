@@ -1,10 +1,18 @@
 import os
+import shutil
 import numpy as np
 import tensorflow as tf
 import keras
 import time
 
 PROJECT_ROOT = "." if "PROJECT_ROOT" in os.environ else "../../.."
+
+OUT_PATH = os.environ["OUT_PATH"] if "OUT_PATH" in os.environ else None
+
+if OUT_PATH is not None:
+    if os.path.exists(OUT_PATH):
+        shutil.rmtree(OUT_PATH)
+    os.makedirs(OUT_PATH, exist_ok=True)
 
 
 def string_to_tensor(string: str):
@@ -14,7 +22,7 @@ def string_to_tensor(string: str):
     )
 
 
-def load_network(file_name: str):
+def load_network(file_name: str) -> list[tuple[tf.Variable, tf.Variable]]:
     "Loads the network from a given file"
     layers = []
     with open(file_name) as file:
@@ -97,6 +105,21 @@ for i, bootstrap in enumerate(BOOTSTRAPS):
     elapsed = end - start
     times.append(elapsed)
 
-with open(f"{PROJECT_ROOT}/impl/tensorflow/results.csv", "w") as file:
-    data = ["id,time", *[f"\n{index},{elapsed}" for index, elapsed in enumerate(times)]]
-    file.writelines(data)
+if OUT_PATH is not None:
+    with open(f"{OUT_PATH}/times.csv", "w") as file:
+        data = [
+            "id,time",
+            *[f"\n{index},{elapsed}" for index, elapsed in enumerate(times)],
+        ]
+        file.writelines(data)
+
+    with open(f"{OUT_PATH}/network", "w") as file:
+        data = []
+        for weights, biases in layers:
+            (height, width) = weights.shape
+            data.append(f"{height} {width}\n")
+            data.append(",".join([str(i) for i in biases.numpy()]))
+            data.append("\n")
+            data.append("\n".join([",".join([str(i) for i in row.numpy()]) for row in weights]))
+            data.append("\n\n")
+        file.writelines(data)
