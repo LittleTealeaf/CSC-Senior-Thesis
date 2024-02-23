@@ -9,6 +9,11 @@ impl/rust/results.csv: impl/rust/target/release/rust-impl
 out/tensorflow: impl/tensorflow/main.py data
 	OUT_PATH="out/tensorflow" PROJECT_ROOT="true" python3 impl/tensorflow/main.py
 
+# Tensorflow CPU
+
+out/tensorflow-cpu: impl/tensorflow-cpu/main.py data
+	OUT_PATH="out/tensorflow-cpu" PROJECT_ROOT="true" python3 impl/tensorflow-cpu/main.py
+
 # CUDA
 impl/cuda/executable: impl/cuda/src
 	nvcc impl/cuda/src/main.cu -o impl/cuda/executable
