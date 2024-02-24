@@ -11,6 +11,3 @@ fn main() {
         .map(|line| line.split(',').filter_map(|n| n.parse().ok()).collect())
         .collect();
 }
-
-
-
