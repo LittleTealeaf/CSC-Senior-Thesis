@@ -8,7 +8,7 @@
 
 using namespace std;
 
-__global__ void vectorAdd(int *a, int *b, int *c) {
+__global__ void vectorAdd(int* a, int* b, int* c) {
   int i = threadIdx.x;
   c[i] = a[i] + b[i];
 }
@@ -17,14 +17,14 @@ int main() {
 
   for (int i = 0; i < 100; i++) {
 
-    int a[] = {1, 2, 3};
-    int b[] = {4, 5, 6};
+    int a[] = { 1, 2, 3 };
+    int b[] = { 4, 5, 6 };
 
-    int c[sizeof(a) / sizeof(int)] = {0};
+    int c[sizeof(a) / sizeof(int)] = { 0 };
 
-    int *cudaA = 0;
-    int *cudaB = 0;
-    int *cudaC = 0;
+    int* cudaA = 0;
+    int* cudaB = 0;
+    int* cudaC = 0;
 
     cudaMalloc(&cudaA, sizeof(a));
     cudaMalloc(&cudaB, sizeof(b));
@@ -35,7 +35,7 @@ int main() {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    vectorAdd<<<1, sizeof(a) / sizeof(int)>>>(cudaA, cudaB, cudaC);
+    vectorAdd << <1, sizeof(a) / sizeof(int) >> > (cudaA, cudaB, cudaC);
 
     auto finish = std::chrono::high_resolution_clock::now();
 
@@ -46,14 +46,9 @@ int main() {
     cudaFree(cudaC);
 
     cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start)
-                .count()
-         << endl;
+      .count()
+      << endl;
   }
-
-
-
-
-
 
   return 0;
 }
