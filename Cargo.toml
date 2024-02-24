@@ -1,5 +1,5 @@
 [workspace]
-members = ["impl/rust", "impl/rust-old"]
+members = ["impl/rust"]
 default-members = ["impl/rust"]
 resolver = "2"
 

@@ -1,5 +1,5 @@
 # Rust Executable
-target/release/rust-impl: data $(wildcard impl/rust/src/**.rs)
+target/release/rust-impl: data $(wildcard impl/rust/src/*.rs) $(wildcard impl/rust/src/**/*.rs)
 	cargo build -p rust-impl --release
 
 out/rust: target/release/rust-impl
