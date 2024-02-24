@@ -22,7 +22,7 @@ build/rust-tf-gpu: data $(wildcard impl/rust-tf/src/*.rs)
 	cargo build -p rust-tf --release --features gpu
 	mv -u target/release/rust-tf build/rust-tf-gpu
 
-out/rust-tf-gpu: build/rust-tf-cpu
+out/rust-tf-gpu: build/rust-tf-gpu
 	OUT_PATH="out/rust-tf-gpu" build/rust-tf-gpu
 
 # Python Tensorflow GPU
@@ -42,8 +42,8 @@ build/cuda: $(wildcard impl/cuda/*.cu)
 	mkdir build 2> /dev/null || true
 	nvcc impl/cuda/main.cu -o build/cuda
 
-out/cuda: target/cuda
-	OUT_PATH="out/cuda" target/cuda
+out/cuda: build/cuda
+	OUT_PATH="out/cuda" build/cuda
 
 # Misc
 
@@ -55,3 +55,6 @@ clean:
 	rm -r data 2> /dev/null || true
 	rm -r out 2> /dev/null || true
 	cargo clean
+
+rmdata:
+	rm -r data 2> /dev/null || true
