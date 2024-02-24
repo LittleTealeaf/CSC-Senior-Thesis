@@ -28,8 +28,6 @@ impl NeuralNetwork {
         let iterator = data.into_iter();
         let count = iterator.len();
 
-        let alpha = alpha / count as f64;
-
         let nudges = iterator
             .par_bridge()
             .map(|data| (self.back_propagate(&data[1..], &data[0])))
@@ -47,7 +45,7 @@ impl NeuralNetwork {
             });
 
         for (index, layer) in nudges.into_iter().enumerate() {
-            self.layers[index] += layer * alpha;
+            self.layers[index] += layer * (alpha / count as f64);
         }
     }
 
