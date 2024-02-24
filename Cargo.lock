@@ -115,6 +115,10 @@ dependencies = [
 [[package]]
 name = "rust-impl"
 version = "0.1.0"
+
+[[package]]
+name = "rust-impl-old"
+version = "0.1.0"
 dependencies = [
  "rand",
  "rayon",
