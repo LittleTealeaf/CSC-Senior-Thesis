@@ -1,5 +1,5 @@
 [workspace]
-members = ["impl/rust", "impl/rust-tensorflow"]
+members = ["impl/rust", "impl/rust-tf"]
 resolver = "2"
 
 [workspace.lints.rust]

@@ -1,46 +1,57 @@
-# Rust Executable
-target/release/rust-impl: data $(wildcard impl/rust/src/*.rs) $(wildcard impl/rust/src/**/*.rs)
+# Rust
+build/rust: data $(wildcard impl/rust/src/*.rs) $(wildcard impl/rust/src/**/*.rs)
+	mkdir build 2> /dev/null || true
 	cargo build -p rust-impl --release
+	mv -u target/release/rust-impl build/rust
 
-out/rust: target/release/rust-impl
-	OUT_PATH="out/rust" target/release/rust-impl
+out/rust: build/rust
+	OUT_PATH="out/rust" build/rust
 
 # Rust Tensorflow CPU
-target/release/rust-tensorflow-cpu: data $(wildcard impl/rust-tensorflow/src/*.rs)
-	cargo build -p rust-tensorflow --release && mv -u target/release/rust-tensorflow target/release/rust-tensorflow-cpu
+build/rust-tf-cpu: data $(wildcard impl/rust-tf/src/*.rs)
+	mkdir build 2> /dev/null || true
+	cargo build -p rust-tf --release
+	mv -u target/release/rust-tf build/rust-tf-cpu
 
-out/rust-tensorflow-cpu: target/release/rust-tensorflow-cpu
-	OUT_PATH="out/rust-tensorflow-cpu" target/release/rust-tensorflow-cpu
+out/rust-tf-cpu: build/rust-tf-cpu
+	OUT_PATH="out/rust-tf-cpu" build/rust-tf-cpu
 
 # Rust Tensorflow GPU
-target/release/rust-tensorflow-gpu: data $(wildcard impl/rust-tensorflow/src/*.rs)
-	cargo build -p rust-tensorflow --release --features gpu && mv -u target/release/rust-tensorflow target/release/rust-tensorflow-gpu
+build/rust-tf-gpu: data $(wildcard impl/rust-tf/src/*.rs)
+	mkdir build 2> /dev/null || true
+	cargo build -p rust-tf --release --features gpu
+	mv -u target/release/rust-tf build/rust-tf-gpu
 
-out/rust-tensorflow-gpu: target/release/rust-tensorflow-gpu
-	OUT_PATH="out/rust-tensorflow-gpu" target/release/rust-tensorflow-gpu
+out/rust-tf-gpu: build/rust-tf-cpu
+	OUT_PATH="out/rust-tf-gpu" build/rust-tf-gpu
 
-# Tensorflow GPU
-out/tensorflow-gpu: impl/tensorflow/main.py data
-	OUT_PATH="out/tensorflow-gpu" PROJECT_ROOT="true" python3 impl/tensorflow/main.py
+# Python Tensorflow GPU
+out/python-tf-gpu: impl/python-tf/main.py data
+	OUT_PATH="out/python-tf-gpu" PROJECT_ROOT="true" python3 impl/python-tf/main.py
 
-# Tensorflow CPU
-out/tensorflow-cpu: impl/tensorflow/main.py data
-	OUT_PATH="out/tensorflow-cpu" PROJECT_ROOT="true" CUDA_VISIBLE_DEVICES='-1' python3 impl/tensorflow/main.py
+# Python Tensorflow CPU
+out/python-tf-cpu: impl/python-tf/main.py data
+	OUT_PATH="out/python-tf-cpu" PROJECT_ROOT="true" CUDA_VISIBLE_DEVICES='-1' python3 impl/python-tf/main.py
 
 # Python Numpy
-out/python-numpy: impl/python-numpy/main.py data
-	OUT_PATH="out/python-numpy" PROJECT_ROOT="true" python3 impl/python-numpy/main.py
+out/python-np: impl/python-np/main.py data
+	OUT_PATH="out/python-np" PROJECT_ROOT="true" python3 impl/python-np/main.py
 
 # CUDA
-target/cuda: $(wildcard impl/cuda/*.cu)
-	mkdir target 2> /dev/null; nvcc impl/cuda/main.cu -o target/cuda
+build/cuda: $(wildcard impl/cuda/*.cu)
+	mkdir build 2> /dev/null || true
+	nvcc impl/cuda/main.cu -o build/cuda
 
 out/cuda: target/cuda
 	OUT_PATH="out/cuda" target/cuda
 
-# Misc.
+# Misc
+
 data: data.toml
 	python3 data.py
 
 clean:
-	rm -r data 2> /dev/null; rm -r out 2> /dev/null; cargo clean
+	rm -r build 2> /dev/null || true
+	rm -r data 2> /dev/null || true
+	rm -r out 2> /dev/null || true
+	cargo clean
