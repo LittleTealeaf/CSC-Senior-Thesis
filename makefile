@@ -1,29 +1,29 @@
 # Rust
-build/rust: data $(wildcard impl/rust/src/*.rs) $(wildcard impl/rust/src/**/*.rs)
-	mkdir build 2> /dev/null || true
+bin/rust: data $(wildcard impl/rust/src/*.rs) $(wildcard impl/rust/src/**/*.rs)
+	mkdir bin 2> /dev/null || true
 	cargo build -p rust-impl --release
-	mv -u target/release/rust-impl build/rust
+	mv -u target/release/rust-impl bin/rust
 
-out/rust: build/rust
-	OUT_PATH="out/rust" build/rust
+out/rust: bin/rust
+	OUT_PATH="out/rust" bin/rust
 
 # Rust Tensorflow CPU
-build/rust-tf-cpu: data $(wildcard impl/rust-tf/src/*.rs)
-	mkdir build 2> /dev/null || true
+bin/rust-tf-cpu: data $(wildcard impl/rust-tf/src/*.rs)
+	mkdir bin 2> /dev/null || true
 	cargo build -p rust-tf --release
-	mv -u target/release/rust-tf build/rust-tf-cpu
+	mv -u target/release/rust-tf bin/rust-tf-cpu
 
-out/rust-tf-cpu: build/rust-tf-cpu
-	OUT_PATH="out/rust-tf-cpu" build/rust-tf-cpu
+out/rust-tf-cpu: bin/rust-tf-cpu
+	OUT_PATH="out/rust-tf-cpu" bin/rust-tf-cpu
 
 # Rust Tensorflow GPU
-build/rust-tf-gpu: data $(wildcard impl/rust-tf/src/*.rs)
-	mkdir build 2> /dev/null || true
+bin/rust-tf-gpu: data $(wildcard impl/rust-tf/src/*.rs)
+	mkdir bin 2> /dev/null || true
 	cargo build -p rust-tf --release --features gpu
-	mv -u target/release/rust-tf build/rust-tf-gpu
+	mv -u target/release/rust-tf bin/rust-tf-gpu
 
-out/rust-tf-gpu: build/rust-tf-gpu
-	OUT_PATH="out/rust-tf-gpu" build/rust-tf-gpu
+out/rust-tf-gpu: bin/rust-tf-gpu
+	OUT_PATH="out/rust-tf-gpu" bin/rust-tf-gpu
 
 # Python Tensorflow GPU
 out/python-tf-gpu: impl/python-tf/main.py data
@@ -38,12 +38,12 @@ out/python-np: impl/python-np/main.py data
 	OUT_PATH="out/python-np" PROJECT_ROOT="true" python3 impl/python-np/main.py
 
 # CUDA
-build/cuda: $(wildcard impl/cuda/*.cu)
-	mkdir build 2> /dev/null || true
-	nvcc impl/cuda/main.cu -o build/cuda
+bin/cuda: $(wildcard impl/cuda/*.cu)
+	mkdir bin 2> /dev/null || true
+	nvcc impl/cuda/main.cu -o bin/cuda
 
-out/cuda: build/cuda
-	OUT_PATH="out/cuda" build/cuda
+out/cuda: bin/cuda
+	OUT_PATH="out/cuda" bin/cuda
 
 # Misc
 
@@ -51,7 +51,7 @@ data: data.toml
 	python3 data.py
 
 clean:
-	rm -r build 2> /dev/null || true
+	rm -r bin 2> /dev/null || true
 	rm -r data 2> /dev/null || true
 	rm -r out 2> /dev/null || true
 	cargo clean
