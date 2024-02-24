@@ -3,11 +3,23 @@
 mod network;
 mod utils;
 
-use std::{env, fs::OpenOptions, io::Write, time::SystemTime};
+use std::{
+    env,
+    fs::{self, OpenOptions},
+    io::Write,
+    path::{Path, PathBuf},
+    time::SystemTime,
+};
 
 use network::NeuralNetwork;
 
 fn main() {
+    let out_path_env = env::var("OUT_PATH").ok();
+
+    if let Some(path) = &out_path_env {
+        let _ = fs::remove_dir_all(path);
+    }
+
     let data: Vec<Vec<f64>> = include_str!("../../../data/data.csv")
         .lines()
         .map(|line| line.split(',').filter_map(|n| n.parse().ok()).collect())
@@ -36,16 +48,39 @@ fn main() {
         times.push(elapsed.as_nanos());
     }
 
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .open(env::var("RESULTS_PATH").unwrap())
-        .unwrap();
+    if let Some(path) = &out_path_env {
+        let out_path = PathBuf::from(path);
 
-    file.write_all("id,time".as_bytes()).unwrap();
+        fs::create_dir_all(&out_path).unwrap();
 
-    for (i, time) in times.into_iter().enumerate() {
-        writeln!(&mut file, "{i},{time}").unwrap();
+        {
+            let times_file = out_path.join(Path::new("results.csv"));
+
+            let mut file = OpenOptions::new()
+                .create(true)
+                .write(true)
+                .truncate(true)
+                .open(times_file)
+                .unwrap();
+
+            file.write_all("id,time".as_bytes()).unwrap();
+
+            for (i, time) in times.into_iter().enumerate() {
+                writeln!(&mut file, "{i},{time}").unwrap();
+            }
+        }
+
+        {
+            let network_file = out_path.join(Path::new("network"));
+
+            let mut file = OpenOptions::new()
+                .create(true)
+                .write(true)
+                .truncate(true)
+                .open(network_file)
+                .unwrap();
+
+            network.write_to_file(&mut file).unwrap();
+        }
     }
 }

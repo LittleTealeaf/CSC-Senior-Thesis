@@ -1,0 +1,7 @@
+[workspace]
+members = ["impl/rust"]
+default-members = ["impl/rust"]
+resolver = "2"
+
+[workspace.lints.rust]
+dead_code = "allow"

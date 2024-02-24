@@ -1,4 +1,8 @@
-use std::ops::MulAssign;
+use std::{
+    fs::File,
+    io::{Error, Write},
+    ops::MulAssign,
+};
 
 use self::layer::Layer;
 use rayon::prelude::*;
@@ -98,5 +102,38 @@ impl NeuralNetwork {
         nudges.reverse();
 
         nudges
+    }
+
+    pub fn write_to_file(&self, file: &mut File) -> Result<(), Error> {
+        for layer in &self.layers {
+            write!(
+                file,
+                "{} {}\n{}\n",
+                layer.input,
+                layer.output,
+                layer
+                    .bias
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(",")
+            )?;
+            for i in 0..layer.input {
+                let start = layer.get_weights_index(i, 0);
+                let end = layer.get_weights_index(i, layer.output);
+                let items = &layer.weights[start..end];
+                write!(
+                    file,
+                    "{}\n",
+                    items
+                        .iter()
+                        .map(ToString::to_string)
+                        .collect::<Vec<_>>()
+                        .join(",")
+                )?;
+            }
+            write!(file, "\n")?;
+        }
+        Ok(())
     }
 }

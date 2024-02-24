@@ -1,9 +1,10 @@
 # Rust Executable
-impl/rust/target/release/rust-impl: data impl/rust/src
-	cd impl/rust && cargo build --release
+target/release/rust-impl: data $(wildcard impl/rust/src/**.rs)
+	cargo build -p rust-impl --release
 
-impl/rust/results.csv: impl/rust/target/release/rust-impl
-	RESULTS_PATH="impl/rust/results.csv" impl/rust/target/release/rust-impl
+out/rust: target/release/rust-impl
+	OUT_PATH="out/rust" target/release/rust-impl
+
 
 # Tensorflow
 out/tensorflow: impl/tensorflow/main.py data

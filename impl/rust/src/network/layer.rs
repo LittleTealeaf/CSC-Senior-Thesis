@@ -58,7 +58,7 @@ impl Layer {
     }
 
     #[inline(always)]
-    fn get_weights_index(&self, input: usize, output: usize) -> usize {
+    pub fn get_weights_index(&self, input: usize, output: usize) -> usize {
         input * self.output + output
     }
 
