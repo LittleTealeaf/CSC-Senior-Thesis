@@ -1,11 +1,11 @@
 import os
 import shutil
 import numpy as np
-import tensorflow as tf
-import keras
 import time
 
-PROJECT_ROOT = "." if "PROJECT_ROOT" in os.environ else "../../.."
+
+
+PROJECT_ROOT = "." if "PROJECT_ROOT" in os.environ else "../.."
 
 OUT_PATH = os.environ["OUT_PATH"] if "OUT_PATH" in os.environ else None
 
@@ -14,56 +14,59 @@ if OUT_PATH is not None:
         shutil.rmtree(OUT_PATH)
     os.makedirs(OUT_PATH, exist_ok=True)
 
+def string_to_array(string: str):
+    return np.fromstring(string, dtype=np.float64, sep=",")
 
-def string_to_tensor(string: str):
-    "Converts a comma separated string of variables into a Tensor"
-    return tf.convert_to_tensor(
-        np.fromstring(string, dtype=np.float64, sep=","), dtype=tf.float64
-    )
-
-
-def load_network(file_name: str) -> list[tuple[tf.Variable, tf.Variable]]:
-    "Loads the network from a given file"
+def load_network(file_name: str) -> list[tuple[np.ndarray, np.ndarray]]:
     layers = []
     with open(file_name) as file:
         sections = file.read().split("\n\n")
-
         for i, section in enumerate(sections):
             lines = section.splitlines()
-
             if len(lines) == 0:
                 continue
-
             lines.pop(0)
-            biases = tf.Variable(string_to_tensor(lines.pop(0)), name=f"{i}-bias")
-            weights = tf.Variable(
-                [string_to_tensor(string) for string in lines],
-                name=f"{i}-weights",
-            )
-
+            biases = string_to_array(lines.pop(0))
+            weights = np.array([string_to_array(string) for string in lines])
             layers.append((weights, biases))
     return layers
 
+def forward_pass(inputs, layers):
+    variables = inputs
+    for weights, biases in layers:
+        variables = np.dot(variables, weights) + biases
+        variables = np.maximum(variables, 0)  # ReLU activation
+    return variables
 
-@tf.function
-def back_propogate(inputs, expected, layers, optimizer):
-    trainable_variables = []
-    with tf.GradientTape() as tape:
-        variables = inputs
-        for weights, biases in layers:
-            variables = variables @ weights
-            variables = variables + biases
-            variables = keras.activations.relu(variables)
-            trainable_variables.extend([weights, biases])
-        loss_raw = tf.reshape(variables, (len(inputs),)) - expected
-        loss_sqr = tf.math.square(loss_raw)
-        loss_mean = tf.reduce_mean(loss_sqr)
-        gradient = tape.gradient(loss_mean, trainable_variables)
+def back_propagate(inputs, expected, layers):
+    trainable_variables = []  # Stores weights and biases
 
-        optimizer.apply_gradients(zip(gradient, trainable_variables))
+    # Forward Pass
+    activations = [inputs]
+    variables = inputs
+    for weights, biases in layers:
+        variables = np.dot(variables, weights) + biases
+        variables = np.maximum(variables, 0)  # ReLU
+        activations.append(variables)
+    trainable_variables.extend(layers)
 
+    # Error and Gradient Calculation
+    loss_raw = variables - expected
+    loss_sqr = loss_raw ** 2
+    loss_mean = np.mean(loss_sqr)
 
-##############################################################
+    gradients = []
+    error = 2 * loss_raw  # Gradient of squared error
+
+    for i in reversed(range(len(layers))):
+        dW = np.dot(activations[i].T, error)
+        db = np.sum(error, axis=0)
+        gradients.insert(0, (dW, db))
+
+        error = np.dot(error, layers[i][0].T)
+        error[activations[i] <= 0] = 0  # ReLU gradient
+
+    return gradients, loss_mean
 
 print("Load Data")
 with open(f"{PROJECT_ROOT}/data/data.csv") as file:
@@ -81,29 +84,28 @@ with open(f"{PROJECT_ROOT}/data/bootstraps.csv") as file:
     BOOTSTRAPS = [[int(i) for i in line.split(",")] for line in lines]
 
 
-print("Create Network")
 layers = load_network(f"{PROJECT_ROOT}/data/network")
 
-times = []
+optimizer_lr = 0.1  # Learning rate
 
-optimizer = keras.optimizers.SGD(learning_rate=0.1)
+times = []
 
 print("Starting Training")
 for i, bootstrap in enumerate(BOOTSTRAPS):
     inputs = np.array([DATA[i][0] for i in bootstrap])
     expected = np.array([DATA[i][1] for i in bootstrap])
 
-    inputs = tf.constant(inputs)
-    expected = tf.constant(expected)
-
     start = time.time_ns()
 
-    back_propogate(inputs, expected, layers, optimizer)
+    gradients, loss = back_propagate(inputs, expected, layers)
+
+    # Update weights and biases
+    for (weights, biases), (dW, db) in zip(layers, gradients):
+        weights -= optimizer_lr * dW
+        biases -= optimizer_lr * db
 
     end = time.time_ns()
-
-    elapsed = end - start
-    times.append(elapsed)
+    times.append(end - start)
 
 if OUT_PATH is not None:
     with open(f"{OUT_PATH}/times.csv", "w") as file:

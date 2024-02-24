@@ -27,6 +27,10 @@ out/tensorflow-gpu: impl/tensorflow/main.py data
 out/tensorflow-cpu: impl/tensorflow/main.py data
 	OUT_PATH="out/tensorflow-cpu" PROJECT_ROOT="true" CUDA_VISIBLE_DEVICES='-1' python3 impl/tensorflow/main.py
 
+# Python Numpy
+out/python-numpy: impl/python-numpy/main.py data
+	OUT_PATH="out/python-numpy" PROJECT_ROOT="true" python3 impl/python-numpy/main.py
+
 # CUDA
 target/cuda: $(wildcard impl/cuda/*.cu)
 	mkdir target 2> /dev/null; nvcc impl/cuda/main.cu -o target/cuda
