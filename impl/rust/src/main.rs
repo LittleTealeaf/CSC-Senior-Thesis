@@ -32,10 +32,8 @@ fn main() {
 
     let mut times = Vec::new();
 
-    for (i, bootstrap) in bootstraps.into_iter().enumerate() {
+    for bootstrap in bootstraps {
         let data = bootstrap.into_iter().map(|i| &data[i]).collect::<Vec<_>>();
-
-        println!("Iteration {i}");
 
         let start = SystemTime::now();
 

@@ -28,15 +28,15 @@ out/tensorflow-cpu: impl/tensorflow/main.py data
 	OUT_PATH="out/tensorflow-cpu" PROJECT_ROOT="true" CUDA_VISIBLE_DEVICES='-1' python3 impl/tensorflow/main.py
 
 # CUDA
-impl/cuda/executable: impl/cuda/src
-	nvcc impl/cuda/src/main.cu -o impl/cuda/executable
+target/cuda: $(wildcard impl/cuda/*.cu)
+	mkdir target 2> /dev/null; nvcc impl/cuda/main.cu -o target/cuda
 
-impl/cuda/results.csv: data impl/cuda/executable
-	RESULTS_PATH="impl/cuda/results.csv" ./impl/cuda/executable && echo "id,time" >> impl/cuda/results.csv
+out/cuda: target/cuda
+	OUT_PATH="out/cuda" target/cuda
 
 # Misc.
 data: data.toml
 	python3 data.py
 
 clean:
-	rm -r data; rm -r out; cargo clean
+	rm -r data 2> /dev/null; rm -r out 2> /dev/null; cargo clean
