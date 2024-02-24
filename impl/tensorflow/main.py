@@ -5,6 +5,7 @@ import tensorflow as tf
 import keras
 import time
 
+
 PROJECT_ROOT = "." if "PROJECT_ROOT" in os.environ else "../../.."
 
 OUT_PATH = os.environ["OUT_PATH"] if "OUT_PATH" in os.environ else None

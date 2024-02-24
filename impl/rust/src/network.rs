@@ -30,7 +30,12 @@ impl NeuralNetwork {
 
         let nudges = iterator
             .par_bridge()
-            .map(|data| (self.back_propagate(&data[1..], &data[0])))
+            .map(|data| {
+                self.back_propagate(&data[1..], &data[0])
+                    .into_iter()
+                    .map(|layer| layer * (alpha / count as f64))
+                    .collect()
+            })
             .reduce(Vec::new, |mut a, b| {
                 if a.is_empty() {
                     b
@@ -45,7 +50,7 @@ impl NeuralNetwork {
             });
 
         for (index, layer) in nudges.into_iter().enumerate() {
-            self.layers[index] += layer * (alpha / count as f64);
+            self.layers[index] += layer;
         }
     }
 
