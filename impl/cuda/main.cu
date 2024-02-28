@@ -8,47 +8,37 @@
 
 using namespace std;
 
-__global__ void vectorAdd(int* a, int* b, int* c) {
-  int i = threadIdx.x;
-  c[i] = a[i] + b[i];
+__global__ void matrixMultiply(double* vec, double* mat, double* res) {
+
 }
+
 
 int main() {
 
-  for (int i = 0; i < 100; i++) {
+  double vec[] = { 0.1,0.2,0.3 };
 
-    int a[] = { 1, 2, 3 };
-    int b[] = { 4, 5, 6 };
-
-    int c[sizeof(a) / sizeof(int)] = { 0 };
-
-    int* cudaA = 0;
-    int* cudaB = 0;
-    int* cudaC = 0;
-
-    cudaMalloc(&cudaA, sizeof(a));
-    cudaMalloc(&cudaB, sizeof(b));
-    cudaMalloc(&cudaC, sizeof(c));
-
-    cudaMemcpy(cudaA, a, sizeof(a), cudaMemcpyHostToDevice);
-    cudaMemcpy(cudaB, b, sizeof(b), cudaMemcpyHostToDevice);
-
-    auto start = std::chrono::high_resolution_clock::now();
-
-    vectorAdd << <1, sizeof(a) / sizeof(int) >> > (cudaA, cudaB, cudaC);
-
-    auto finish = std::chrono::high_resolution_clock::now();
-
-    cudaMemcpy(c, cudaC, sizeof(c), cudaMemcpyDeviceToHost);
-
-    cudaFree(cudaA);
-    cudaFree(cudaB);
-    cudaFree(cudaC);
-
-    cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start)
-      .count()
-      << endl;
+  double mat[5 * 3];
+  for (int i = 0; i < 5 * 3; i++) {
+    mat[i] = 0.1 * i;
   }
+
+
+
+  double* cudaVec = 0;
+  double* cudaMat = 0;
+  double* cudaRes = 0;
+
+  cudaMalloc(&cudaVec, sizeof(vec));
+  cudaMalloc(&cudaMat, sizeof(mat));
+  cudaMalloc(&cudaRes, sizeof(double) * 3 * 5 * 3);
+
+  cudaMemcpy(cudaVec, vec, sizeof(vec), cudaMemcpyHostToDevice);
+  cudaMemcpy(cudaMat, mat, sizeof(mat), cudaMemcpyHostToDevice);
+
+  cudaFree(&cudaVec);
+  cudaFree(&cudaMat);
+  cudaFree(&cudaRes);
+
 
   return 0;
 }
