@@ -17,7 +17,7 @@ fn main() {
     if let Some(out_path) = &out_env {
         let _ = remove_dir_all(out_path);
     }
-
+    
     let data: Vec<Vec<f64>> = include_str!("../../../data/data.csv")
         .lines()
         .map(|line| line.split(',').filter_map(|n| n.parse().ok()).collect())
