@@ -1,54 +1,83 @@
 #include "cuda_runtime.h"
 
 #include <chrono>
-#include <iostream>
 #include <cuda_device_runtime_api.h>
 #include <cuda_runtime_api.h>
 #include <driver_types.h>
+#include <iostream>
 
 using namespace std;
 
-__global__ void vectorAdd(int* a, int* b, int* c) {
-  int i = threadIdx.x;
-  c[i] = a[i] + b[i];
+
+/**
+ * Multiplying a n*m and m*w matrix together to get a n*w matrix
+*/
+__global__ void cudaMatrixMultiply(double* a, double* b, double* out, int n, int m, int w) {
+
+  int ROW = blockIdx.y * blockDim.y + threadIdx.y;
+  int COL = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if (ROW < n && COL < w) {
+    double tmp = 0.0;
+    for (int i = 0; i < m; i++) {
+      tmp += a[m * ROW + i] * b[i * w + COL];
+    }
+    out[ROW * w + COL] = tmp;
+  }
+}
+
+void matrixMultiplication(double* a, double* b, double* out, int n, int m, int w) {
+  dim3 threadsPerBlock(w, n);
+  dim3 blocksPerGrid(1, 1);
+
+  if (n * w > 512) {
+    threadsPerBlock.x = 512;
+    threadsPerBlock.y = 512;
+    blocksPerGrid.x = ceil(double(w) / double(threadsPerBlock.x));
+    blocksPerGrid.y = ceil(double(n) / double(threadsPerBlock.y));
+  }
+
+  cudaMatrixMultiply << <blocksPerGrid, threadsPerBlock >> > (a, b, out, n, m, w);
 }
 
 int main() {
 
-  for (int i = 0; i < 100; i++) {
+  // Multiplying a 3x3 matrix by 3x3
 
-    int a[] = { 1, 2, 3 };
-    int b[] = { 4, 5, 6 };
+  int n = 700;
+  int m = 550;
+  int w = 700;
 
-    int c[sizeof(a) / sizeof(int)] = { 0 };
+  double mat_a[n * m];
+  double mat_b[m * w];
+  double mat_out[n * w];
 
-    int* cudaA = 0;
-    int* cudaB = 0;
-    int* cudaC = 0;
-
-    cudaMalloc(&cudaA, sizeof(a));
-    cudaMalloc(&cudaB, sizeof(b));
-    cudaMalloc(&cudaC, sizeof(c));
-
-    cudaMemcpy(cudaA, a, sizeof(a), cudaMemcpyHostToDevice);
-    cudaMemcpy(cudaB, b, sizeof(b), cudaMemcpyHostToDevice);
-
-    auto start = std::chrono::high_resolution_clock::now();
-
-    vectorAdd << <1, sizeof(a) / sizeof(int) >> > (cudaA, cudaB, cudaC);
-
-    auto finish = std::chrono::high_resolution_clock::now();
-
-    cudaMemcpy(c, cudaC, sizeof(c), cudaMemcpyDeviceToHost);
-
-    cudaFree(cudaA);
-    cudaFree(cudaB);
-    cudaFree(cudaC);
-
-    cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start)
-      .count()
-      << endl;
+  for (int i = 0; i < n * m; i++) {
+    mat_a[i] = sin(i);
   }
+
+  for (int i = 0; i < m * w; i++) {
+    mat_b[i] = cos(i);
+  }
+
+  double* cudaA;
+  double* cudaB;
+  double* cudaOut;
+
+  cudaMalloc(&cudaA, sizeof(mat_a));
+  cudaMalloc(&cudaB, sizeof(mat_b));
+  cudaMalloc(&cudaOut, sizeof(double) * n * w);
+
+  cudaMemcpy(cudaA, mat_a, sizeof(mat_a), cudaMemcpyHostToDevice);
+  cudaMemcpy(cudaB, mat_b, sizeof(mat_b), cudaMemcpyHostToDevice);
+
+  matrixMultiplication(cudaA, cudaB, cudaOut, n, m, w);
+
+  cudaMemcpy(mat_out, cudaOut, sizeof(mat_out), cudaMemcpyDeviceToHost);
+
+  cudaFree(cudaA);
+  cudaFree(cudaB);
+  cudaFree(cudaOut);
 
   return 0;
 }
