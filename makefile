@@ -1,3 +1,20 @@
+
+# Paper
+thesis/document.pdf: thesis/document.toc thesis/document.tex
+	cd thesis && pdflatex -halt-on-error document.tex >> /dev/null
+
+thesis/document.aux: thesis/document.tex
+	cd thesis && pdflatex -halt-on-error document.tex >> /dev/null
+
+thesis/document.blg: thesis/document.aux thesis/refs.bib
+	cd thesis && bibtex document.aux >> /dev/null
+
+thesis/document.toc: thesis/document.blg
+	cd thesis && pdflatex -halt-on-error document.tex >> /dev/null
+
+paper/clean:
+	cd paper && rm document.aux document.bbl document.blg document.log document.pdf document.toc
+
 # Rust
 bin/rust: data $(wildcard impl/rust/src/*.rs) $(wildcard impl/rust/src/**/*.rs)
 	mkdir bin 2> /dev/null || true
@@ -45,27 +62,7 @@ bin/cuda: $(wildcard impl/cuda/*.cu)
 out/cuda: bin/cuda
 	OUT_PATH="out/cuda" bin/cuda
 
-
-# Paper
-
-
-thesis/document.pdf: thesis/document.toc thesis/document.tex
-	cd thesis && pdflatex -halt-on-error document.tex >> /dev/null
-
-thesis/document.aux: thesis/document.tex
-	cd thesis && pdflatex -halt-on-error document.tex >> /dev/null
-
-thesis/document.blg: thesis/document.aux thesis/refs.bib
-	cd thesis && bibtex document.aux >> /dev/null
-
-thesis/document.toc: thesis/document.blg
-	cd thesis && pdflatex -halt-on-error document.tex >> /dev/null
-
-paper/clean:
-	cd paper && rm document.aux document.bbl document.blg document.log document.pdf document.toc
-
 # Misc
-
 data: data.toml
 	python3 data.py
 
