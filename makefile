@@ -1,3 +1,20 @@
+
+# Paper
+thesis/document.pdf: thesis/document.toc thesis/document.tex
+	cd thesis && pdflatex -halt-on-error document.tex >> /dev/null
+
+thesis/document.aux: thesis/document.tex
+	cd thesis && pdflatex -halt-on-error document.tex >> /dev/null
+
+thesis/document.blg: thesis/document.aux thesis/refs.bib
+	cd thesis && bibtex document.aux >> /dev/null
+
+thesis/document.toc: thesis/document.blg
+	cd thesis && pdflatex -halt-on-error document.tex >> /dev/null
+
+paper/clean:
+	cd paper && rm document.aux document.bbl document.blg document.log document.pdf document.toc
+
 # Rust
 bin/rust: data $(wildcard impl/rust/src/*.rs) $(wildcard impl/rust/src/**/*.rs)
 	mkdir bin 2> /dev/null || true
@@ -46,15 +63,14 @@ out/cuda: bin/cuda
 	OUT_PATH="out/cuda" bin/cuda
 
 # Misc
-
 data: data.toml
 	python3 data.py
+
+rmdata:
+	rm -r data 2> /dev/null || true
 
 clean:
 	rm -r bin 2> /dev/null || true
 	rm -r data 2> /dev/null || true
 	rm -r out 2> /dev/null || true
 	cargo clean
-
-rmdata:
-	rm -r data 2> /dev/null || true
