@@ -8,39 +8,70 @@
 
 using namespace std;
 
+class CudaTensor
+{
+private:
+  int rows;
+  int cols;
+  double *cuda;
+
+public:
+  CudaTensor(int rows, int cols)
+  {
+    this->cols = cols;
+    this->rows = rows;
+    cudaMalloc(&this->cuda, this->cols * this->rows * sizeof(double));
+  }
+
+  void setValues(double *values)
+  {
+    cudaMemcpy(this->cuda, values, this->cols * this->rows * sizeof(double), cudaMemcpyHostToDevice);
+  }
+
+  ~CudaTensor()
+  {
+    cudaFree(this->cuda);
+  }
+};
 
 /**
  * Multiplying a n*m and m*w matrix together to get a n*w matrix
-*/
-__global__ void cudaMatrixMultiply(double* a, double* b, double* out, int n, int m, int w) {
+ */
+__global__ void cudaMatrixMultiply(double *a, double *b, double *out, int n, int m, int w)
+{
 
   int ROW = blockIdx.y * blockDim.y + threadIdx.y;
   int COL = blockIdx.x * blockDim.x + threadIdx.x;
 
-  if (ROW < n && COL < w) {
+  if (ROW < n && COL < w)
+  {
     double tmp = 0.0;
-    for (int i = 0; i < m; i++) {
+    for (int i = 0; i < m; i++)
+    {
       tmp += a[m * ROW + i] * b[i * w + COL];
     }
     out[ROW * w + COL] = tmp;
   }
 }
 
-void matrixMultiplication(double* a, double* b, double* out, int n, int m, int w) {
+void matrixMultiplication(double *a, double *b, double *out, int n, int m, int w)
+{
   dim3 threadsPerBlock(w, n);
   dim3 blocksPerGrid(1, 1);
 
-  if (n * w > 512) {
+  if (n * w > 512)
+  {
     threadsPerBlock.x = 512;
     threadsPerBlock.y = 512;
     blocksPerGrid.x = ceil(double(w) / double(threadsPerBlock.x));
     blocksPerGrid.y = ceil(double(n) / double(threadsPerBlock.y));
   }
 
-  cudaMatrixMultiply << <blocksPerGrid, threadsPerBlock >> > (a, b, out, n, m, w);
+  cudaMatrixMultiply<<<blocksPerGrid, threadsPerBlock>>>(a, b, out, n, m, w);
 }
 
-int main() {
+int main()
+{
 
   // Multiplying a 3x3 matrix by 3x3
 
@@ -52,17 +83,19 @@ int main() {
   double mat_b[m * w];
   double mat_out[n * w];
 
-  for (int i = 0; i < n * m; i++) {
+  for (int i = 0; i < n * m; i++)
+  {
     mat_a[i] = sin(i);
   }
 
-  for (int i = 0; i < m * w; i++) {
+  for (int i = 0; i < m * w; i++)
+  {
     mat_b[i] = cos(i);
   }
 
-  double* cudaA;
-  double* cudaB;
-  double* cudaOut;
+  double *cudaA;
+  double *cudaB;
+  double *cudaOut;
 
   cudaMalloc(&cudaA, sizeof(mat_a));
   cudaMalloc(&cudaB, sizeof(mat_b));
