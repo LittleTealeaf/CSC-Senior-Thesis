@@ -24,25 +24,6 @@ __global__ void cudaFeedForward(double* inputs, double* weights, double* bias, d
   }
 }
 
-/**
- * Multiplying a n*m and m*w matrix together to get a n*w matrix
- */
-__global__ void cudaMatrixMultiply(double* a, double* b, double* out, int n, int m, int w)
-{
-
-  int ROW = blockIdx.y * blockDim.y + threadIdx.y;
-  int COL = blockIdx.x * blockDim.x + threadIdx.x;
-
-  if (ROW < n && COL < w) {
-    double tmp = 0.0;
-    for (int i = 0; i < m; i++) {
-      tmp += a[m * ROW + i] * b[i * w + COL];
-    }
-    out[ROW * w + COL] = tmp;
-  }
-}
-
-
 class CudaTensor {
 private:
   int rows;
@@ -107,22 +88,6 @@ public:
     cudaFeedForward << <blocksPerGrid, threadsPerBlock >> > (cuda_in, this->weights.getCuda(), this->bias.getCuda(), cuda_out, observations, this->input, this->output);
   }
 };
-
-
-
-void matrixMultiplication(double* a, double* b, double* out, int n, int m, int w) {
-  dim3 threadsPerBlock(w, n);
-  dim3 blocksPerGrid(1, 1);
-
-  if (n * w > 512) {
-    threadsPerBlock.x = 512;
-    threadsPerBlock.y = 512;
-    blocksPerGrid.x = ceil(double(w) / double(threadsPerBlock.x));
-    blocksPerGrid.y = ceil(double(n) / double(threadsPerBlock.y));
-  }
-
-  cudaMatrixMultiply << <blocksPerGrid, threadsPerBlock >> > (a, b, out, n, m, w);
-}
 
 int main() {
   NetworkLayer layer = NetworkLayer(2, 2);
