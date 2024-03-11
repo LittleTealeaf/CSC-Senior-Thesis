@@ -10,9 +10,9 @@
 
 using namespace std;
 
-__global__ void cudaFeedForward(double *inputs, double *weights, double *bias,
-                                double *out, int observations, int input,
-                                int output) {
+__global__ void cudaFeedForward(double* inputs, double* weights, double* bias,
+  double* out, int observations, int input,
+  int output) {
   int COL = blockIdx.x * blockDim.x + threadIdx.x; // Ouput
   int ROW = blockIdx.y * blockDim.y + threadIdx.y; //  Observation
 
@@ -26,9 +26,9 @@ __global__ void cudaFeedForward(double *inputs, double *weights, double *bias,
   }
 }
 
-__global__ void cudaBackPropagateErrorOutput(double *activation,
-                                             double *expected, double *out,
-                                             int observations) {
+__global__ void cudaBackPropagateErrorOutput(double* activation,
+  double* expected, double* out,
+  int observations) {
   // idx is the observation
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -40,8 +40,8 @@ __global__ void cudaBackPropagateErrorOutput(double *activation,
   }
 }
 
-void runCudaBackPropagateErrorOutput(double *cuda_activation, double *expected,
-                                     double *out, int observations) {
+void runCudaBackPropagateErrorOutput(double* cuda_activation, double* expected,
+  double* out, int observations) {
   dim3 threadsPerBlock(observations);
   dim3 blocksPerGrid(1);
 
@@ -50,14 +50,14 @@ void runCudaBackPropagateErrorOutput(double *cuda_activation, double *expected,
     blocksPerGrid.x = ceil(double(observations) / double(threadsPerBlock.x));
   }
 
-  cudaBackPropagateErrorOutput<<<blocksPerGrid, threadsPerBlock>>>(
-      cuda_activation, expected, out, observations);
+  cudaBackPropagateErrorOutput << <blocksPerGrid, threadsPerBlock >> > (
+    cuda_activation, expected, out, observations);
 }
 
-__global__ void cudaBackPropagateError(double *activation, double *weights,
-                                       double *errors, double *out,
-                                       int observations, int layer_nodes,
-                                       int next_nodes) {
+__global__ void cudaBackPropagateError(double* activation, double* weights,
+  double* errors, double* out,
+  int observations, int layer_nodes,
+  int next_nodes) {
   int obs = blockIdx.x * blockDim.x + threadIdx.x;  // Observation
   int node = blockIdx.y * blockDim.y + threadIdx.y; // Node
 
@@ -78,7 +78,7 @@ class CudaTensor {
 private:
   int rows;
   int cols;
-  double *cuda;
+  double* cuda;
 
 public:
   CudaTensor() : rows(0), cols(0), cuda(nullptr) {}
@@ -87,16 +87,16 @@ public:
     cudaMalloc(&this->cuda, this->cols * this->rows * sizeof(double));
   }
 
-  double *getCuda() { return this->cuda; }
+  double* getCuda() { return this->cuda; }
 
-  void setValues(double *values) {
+  void setValues(double* values) {
     cudaMemcpy(this->cuda, values, this->cols * this->rows * sizeof(double),
-               cudaMemcpyHostToDevice);
+      cudaMemcpyHostToDevice);
   }
 
-  void getValues(double *values) {
+  void getValues(double* values) {
     cudaMemcpy(values, this->cuda, this->cols * this->rows * sizeof(double),
-               cudaMemcpyDeviceToHost);
+      cudaMemcpyDeviceToHost);
   }
 
   void free() { cudaFree(this->cuda); }
@@ -111,13 +111,13 @@ public:
   int input;
   int output;
   NetworkLayer(int input, int output)
-      : input(input), output(output), weights(input, output), bias(output, 1) {}
+    : input(input), output(output), weights(input, output), bias(output, 1) {}
 
-  void setWeights(double *values) { this->weights.setValues(values); }
+  void setWeights(double* values) { this->weights.setValues(values); }
 
-  void setBias(double *bias) { this->bias.setValues(bias); }
+  void setBias(double* bias) { this->bias.setValues(bias); }
 
-  void feedForward(double *cuda_in, int observations, double *cuda_out) {
+  void feedForward(double* cuda_in, int observations, double* cuda_out) {
     dim3 threadsPerBlock(this->output, observations);
     dim3 blocksPerGrid(1, 1);
 
@@ -128,9 +128,9 @@ public:
       blocksPerGrid.y = ceil(double(observations) / double(threadsPerBlock.y));
     }
 
-    cudaFeedForward<<<blocksPerGrid, threadsPerBlock>>>(
-        cuda_in, this->weights.getCuda(), this->bias.getCuda(), cuda_out,
-        observations, this->input, this->output);
+    cudaFeedForward << <blocksPerGrid, threadsPerBlock >> > (
+      cuda_in, this->weights.getCuda(), this->bias.getCuda(), cuda_out,
+      observations, this->input, this->output);
   }
 
   void free() {
@@ -197,39 +197,39 @@ public:
 
   // TODO: convert inputs to be cuda so we can copy to GPU outside of timed
   // sections
-  void train(int observations, double *inputs, double *expected) {
-    double *cuda_inputs;
+  void train(int observations, double* inputs, double* expected) {
+    double* cuda_inputs;
     cudaMalloc(&cuda_inputs, sizeof(double) * observations * this->input);
     cudaMemcpy(cuda_inputs, inputs, sizeof(double) * observations * this->input,
-               cudaMemcpyHostToDevice);
+      cudaMemcpyHostToDevice);
 
-    double *cuda_expected;
+    double* cuda_expected;
     cudaMalloc(&cuda_expected, sizeof(double) * observations);
     cudaMemcpy(cuda_expected, expected, sizeof(double) * observations,
-               cudaMemcpyHostToDevice);
+      cudaMemcpyHostToDevice);
 
-    double *outputs[layer_count];
+    double* outputs[layer_count];
 
     cudaMalloc(&outputs[0],
-               sizeof(double) * layers.at(0).output * observations);
+      sizeof(double) * layers.at(0).output * observations);
     layers.at(0).feedForward(cuda_inputs, observations, outputs[0]);
 
     for (int i = 1; i < layer_count; i++) {
       cudaMalloc(&outputs[i],
-                 sizeof(double) * layers.at(i).output * observations);
+        sizeof(double) * layers.at(i).output * observations);
       layers.at(i).feedForward(outputs[i - 1], observations, outputs[i]);
     }
 
-    double *errors[layer_count];
+    double* errors[layer_count];
 
     for (int i = 0; i < layer_count; i++) {
       cudaMalloc(&errors[i],
-                 sizeof(double) * observations * layers.at(i).output);
+        sizeof(double) * observations * layers.at(i).output);
     }
 
-		// TODO MAYBE REBUILD THIS CAUSE I DONT KNOW WHAT I'M DOING
+    // TODO MAYBE REBUILD THIS CAUSE I DONT KNOW WHAT I'M DOING
     runCudaBackPropagateErrorOutput(outputs[layer_count - 1], cuda_expected,
-                                    errors[layer_count - 1], observations);
+      errors[layer_count - 1], observations);
 
     cudaFree(cuda_inputs);
     cudaFree(cuda_expected);
@@ -248,8 +248,8 @@ public:
 
 int main() {
   Network network = Network(ifstream(getenv("NETWORK")));
-  double input[] = {1.0, 0.0};
-  double expected[] = {3.0};
+  double input[] = { 1.0, 0.0 };
+  double expected[] = { 3.0 };
 
   network.train(1, input, expected);
 }
