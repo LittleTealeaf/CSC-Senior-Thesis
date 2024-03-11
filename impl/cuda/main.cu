@@ -227,6 +227,7 @@ public:
                  sizeof(double) * observations * layers.at(i).output);
     }
 
+		// TODO MAYBE REBUILD THIS CAUSE I DONT KNOW WHAT I'M DOING
     runCudaBackPropagateErrorOutput(outputs[layer_count - 1], cuda_expected,
                                     errors[layer_count - 1], observations);
 
