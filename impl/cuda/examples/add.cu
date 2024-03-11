@@ -45,6 +45,9 @@ int main() {
     cudaFree(cudaB);
     cudaFree(cudaC);
 
+    auto test = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start)
+      .count();
+
     cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start)
       .count()
       << endl;

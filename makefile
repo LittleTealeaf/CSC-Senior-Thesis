@@ -60,7 +60,9 @@ bin/cuda: impl/cuda/main.cu
 	nvcc impl/cuda/main.cu -o bin/cuda
 
 out/cuda: bin/cuda data
-	OUT_PATH="out/cuda" NETWORK="data/network" BOOTSTRAP="data/bootstraps.csv" DATA="data/data.csv"  bin/cuda
+	mdkir out || rm -r out/cuda || true
+	mkdir out/cuda
+	OUT_TIMES="out/cuda/times.csv" NETWORK="data/network" BOOTSTRAP="data/bootstraps.csv" DATA="data/data.csv"  bin/cuda
 
 # Misc
 data: data.toml data.py

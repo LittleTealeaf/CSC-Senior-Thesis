@@ -142,13 +142,13 @@ public:
 
 class Network {
 private:
-  int input;
   int layer_count;
   vector<NetworkLayer> layers;
 
 public:
+  int features;
   Network(ifstream stream) {
-    this->input = -1;
+    this->features = -1;
 
     string line;
 
@@ -156,8 +156,8 @@ public:
       // Line is currently <in> <out>
       int index = line.find(' ');
       int input = stoi(line.substr(0, index));
-      if (this->input == -1) {
-        this->input = input;
+      if (this->features == -1) {
+        this->features = input;
       }
       int output = stoi(line.substr(index + 1));
 
@@ -176,7 +176,7 @@ public:
       for (int i = 0; i < input; i++) {
         getline(stream, line);
         for (int o = 0; o < output - 1; o++) {
-          index = line.find(' ');
+          index = line.find(',');
           weights[i * output + o] = stod(line.substr(0, index));
           line = line.substr(index + 1);
         }
@@ -198,16 +198,8 @@ public:
 
   // TODO: convert inputs to be cuda so we can copy to GPU outside of timed
   // sections
-  void train(int observations, double* inputs, double* expected) {
-    double* cuda_inputs;
-    cudaMalloc(&cuda_inputs, sizeof(double) * observations * this->input);
-    cudaMemcpy(cuda_inputs, inputs, sizeof(double) * observations * this->input,
-               cudaMemcpyHostToDevice);
+  void train(int observations, double* cuda_inputs, double* cuda_expected) {
 
-    double* cuda_expected;
-    cudaMalloc(&cuda_expected, sizeof(double) * observations);
-    cudaMemcpy(cuda_expected, expected, sizeof(double) * observations,
-               cudaMemcpyHostToDevice);
 
     double* outputs[layer_count];
 
@@ -248,9 +240,84 @@ public:
 };
 
 int main() {
-  Network network = Network(ifstream(getenv("NETWORK")));
-  double input[] = { 1.0, 0.0 };
-  double expected[] = { 3.0 };
 
-  network.train(1, input, expected);
+  Network network = Network(ifstream(getenv("NETWORK")));
+  int features = network.features;
+
+  vector<double> data;
+
+  // Read data file
+  ifstream stream(getenv("DATA"));
+  string line;
+  while (getline(stream, line)) {
+
+    int index;
+    for (int i = 0; i < network.features; i++) {
+      index = line.find(',');
+      data.push_back(stod(line.substr(0, index)));
+      line = line.substr(index + 1);
+    }
+    data.push_back(stod(line));
+  }
+  stream.close();
+
+  vector<vector<int>> bootstraps;
+  stream = ifstream(getenv("BOOTSTRAP"));
+  while (getline(stream, line)) {
+    vector<int> choices;
+    int index;
+    while ((index = line.find(',')) >= 0) {
+      choices.push_back(stoi(line.substr(0, index)));
+      line = line.substr(index + 1);
+    }
+    choices.push_back(stoi(line));
+
+    bootstraps.push_back(choices);
+  }
+
+  vector<std::chrono::nanoseconds::rep> times;
+
+  for (vector<int> bootstrap : bootstraps) {
+    double train_data[network.features * bootstrap.size()];
+    double train_expected[bootstrap.size()];
+
+    for (int i = 0; i < bootstrap.size(); i++) {
+      int index = bootstrap.at(i);
+      train_expected[i] = data.at((features + 1) * index);
+      for (int j = 0; j < features; j++) {
+        train_data[i + j] = data.at((features + 1) * index + 1 + j);
+      }
+    }
+
+    double* cuda_inputs;
+    cudaMalloc(&cuda_inputs, sizeof(double) * bootstrap.size() * features);
+    cudaMemcpy(cuda_inputs, train_data, sizeof(double) * bootstrap.size() * features, cudaMemcpyHostToDevice);
+
+    double* cuda_expected;
+    cudaMalloc(&cuda_expected, sizeof(double) * bootstrap.size());
+    cudaMemcpy(cuda_expected, train_expected, sizeof(double) * bootstrap.size(), cudaMemcpyHostToDevice);
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    network.train(bootstrap.size(), cuda_inputs, cuda_expected);
+
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    times.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count());
+  }
+
+  ofstream out_file(getenv("OUT_TIMES"));
+  if (out_file.is_open()) {
+    out_file << "id,time\n";
+    for (int i = 0; i < times.size(); ++i) {
+      out_file << i << "," << times.at(i) << "\n";
+    }
+
+    out_file.close();
+
+  }
+
+  data.clear();
+  bootstraps.clear();
 }
