@@ -72,4 +72,5 @@ with open("data/network", "w") as file:
                 ]
             )
         )
-        file.write("\n\n")
+        if i < len(LAYERS) - 1:
+            file.write("\n\n")

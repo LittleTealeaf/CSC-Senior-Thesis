@@ -3,5 +3,5 @@
         "*.css": "css",
         "chrono": "cpp",
         "random": "cpp"
-    }
+    },
 }

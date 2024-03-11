@@ -55,15 +55,15 @@ out/python-np: impl/python-np/main.py data
 	OUT_PATH="out/python-np" PROJECT_ROOT="true" python3 impl/python-np/main.py
 
 # CUDA
-bin/cuda: $(wildcard impl/cuda/*.cu)
+bin/cuda: impl/cuda/main.cu
 	mkdir bin 2> /dev/null || true
 	nvcc impl/cuda/main.cu -o bin/cuda
 
-out/cuda: bin/cuda
-	OUT_PATH="out/cuda" bin/cuda
+out/cuda: bin/cuda data
+	OUT_PATH="out/cuda" NETWORK="data/network" BOOTSTRAP="data/bootstraps.csv" DATA="data/data.csv"  bin/cuda
 
 # Misc
-data: data.toml
+data: data.toml data.py
 	python3 data.py
 
 rmdata:
