@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.css": "css",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "random": "cpp"
     }
 }
