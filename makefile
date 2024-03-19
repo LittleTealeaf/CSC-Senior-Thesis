@@ -57,10 +57,10 @@ out/python-np: impl/python-np/main.py data
 # CUDA
 bin/cuda: impl/cuda/main.cu
 	mkdir bin 2> /dev/null || true
-	nvcc impl/cuda/main.cu -o bin/cuda
+	nvcc impl/cuda/main.cu -o bin/cuda -O3 -extra-device-vectorization
 
 out/cuda: bin/cuda data
-	mdkir out || rm -r out/cuda || true
+	mkdir out || rm -r out/cuda || true
 	mkdir out/cuda
 	OUT_TIMES="out/cuda/times.csv" NETWORK="data/network" BOOTSTRAP="data/bootstraps.csv" DATA="data/data.csv"  bin/cuda
 
