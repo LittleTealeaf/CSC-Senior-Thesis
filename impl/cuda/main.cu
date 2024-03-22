@@ -33,17 +33,61 @@ __global__ void cudaFeedForward(double *in, double *weights, double *output,
   }
 }
 
-__global__ void cudaBackPropagateOutput(double *activation_i, double *input_j,
-                                        double *activation_j, double *weights,
-                                        double *out_nudges, double *out_error,
-                                        int n, int f) {
+__global__ void cudaBackPropagateOutput(double *a_j, double *in_o, double *a_o,
+                                        double *exp, double *out_error,
+                                        double *out_nudge, int n, int f) {
   // x <-- 0..n
   int ROW = blockIdx.x * blockDim.x + threadIdx.x;
-  // y <-- 0..o
+  // y <-- 0..f
   int COL = blockIdx.y * blockDim.y + threadIdx.y;
 
-  if (ROW < n && COL < f) {
+  if (ROW < n && COL < f + 1) {
+    double error = 0.0;
+    if (a_o[ROW] > 0.0) {
+      error = exp[ROW] - a_o[ROW];
+    }
+
+    if (COL == f) {
+      out_error[ROW] = error;
+      out_nudge[(ROW + 1) * (f + 1) - 1] = error;
+    } else {
+      out_nudge[ROW * (f + 1) + COL] = a_j[f * ROW + COL] * error;
+    }
   }
+}
+
+__global__ void cudaBackPropagation(double *a_i, double *in_j, double *a_j,
+                                    double *w_k, double *err_k,
+                                    double *out_nudge, double *out_err_j, int N,
+                                    int F, int O, int P) {
+
+	// 0..N
+	int n = blockIdx.x * blockDim.x + threadIdx.x;
+
+
+
+  // // x <-- 0..n
+  // int ROW = blockIdx.x * blockDim.x + threadIdx.x;
+  // // y <-- 0..o
+  // int COL = blockIdx.y * blockDim.y + threadIdx.y;
+  //
+  // if (ROW < N && COL < O + 1) {
+  //
+  //   if (COL == O) {
+  //     // bias
+  //   } else {
+  //     double error = 0.0;
+  //     // Derivative of in_j
+  //     if (in_j[ROW * O + COL] > 0.0) {
+  //       for (int k = 0; k < P; k++) {
+  //         error += w_k[COL * P + k] * err_k[ROW * O + k];
+  //       }
+  //     }
+  //
+		// 	out_err_j[ROW * O + COL]
+  //
+  //   }
+  // }
 }
 
 class CudaTensor {
