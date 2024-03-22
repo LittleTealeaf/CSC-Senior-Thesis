@@ -66,6 +66,7 @@ __global__ void cudaBackPropagation(double *a_i, double *in_j, double *a_j,
 
 
 
+
   // // x <-- 0..n
   // int ROW = blockIdx.x * blockDim.x + threadIdx.x;
   // // y <-- 0..o
