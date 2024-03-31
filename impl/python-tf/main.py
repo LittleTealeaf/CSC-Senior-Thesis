@@ -5,14 +5,17 @@ import tensorflow as tf
 import keras
 import time
 
-PROJECT_ROOT = "." if "PROJECT_ROOT" in os.environ else "../../.."
 
 OUT_PATH = os.environ["OUT_PATH"] if "OUT_PATH" in os.environ else None
-
-if OUT_PATH is not None:
-    if os.path.exists(OUT_PATH):
-        shutil.rmtree(OUT_PATH)
-    os.makedirs(OUT_PATH, exist_ok=True)
+assert OUT_PATH is not None
+DATASET_PATH = os.environ["DATASET_PATH"] if "DATASET_PATH" in os.environ else None
+assert DATASET_PATH is not None
+NETWORK_PATH = os.environ["NETWORK_PATH"] if "NETWORK_PATH" in os.environ else None
+assert NETWORK_PATH is not None
+BOOTSTRAP_COUNT = int(os.environ["BOOTSTRAP_COUNT"]) if "BOOTSTRAP_COUNT" in os.environ else None
+assert BOOTSTRAP_COUNT is not None
+BOOTSTRAP_PATH = os.environ['BOOTSTRAP_PATH'] if 'BOOTSTRAP_PATH' in os.environ else None
+assert BOOTSTRAP_PATH is not None
 
 
 def string_to_tensor(string: str):
@@ -65,8 +68,14 @@ def back_propogate(inputs, expected, layers, optimizer):
 
 ##############################################################
 
+print("Load Bootstraps")
+with open(BOOTSTRAP_PATH) as file:
+    lines = file.readlines()
+    BOOTSTRAPS = [[int(i) for i in line.split(",")] for line in lines]
+
+
 print("Load Data")
-with open(f"{PROJECT_ROOT}/data/data.csv") as file:
+with open(DATASET_PATH) as file:
     lines = file.readlines()
     DATA = []
     for line in lines:
@@ -75,23 +84,20 @@ with open(f"{PROJECT_ROOT}/data/data.csv") as file:
         variables = np.array(line_data[1:], dtype=np.float64)
         DATA.append((variables, expected))
 
-print("Load Bootstraps")
-with open(f"{PROJECT_ROOT}/data/bootstraps.csv") as file:
-    lines = file.readlines()
-    BOOTSTRAPS = [[int(i) for i in line.split(",")] for line in lines]
-
-
 print("Create Network")
-layers = load_network(f"{PROJECT_ROOT}/data/network")
+layers = load_network(NETWORK_PATH)
+
 
 times = []
 
-optimizer = keras.optimizers.SGD(learning_rate=0.1)
 
 print("Starting Training")
+optimizer = keras.optimizers.SGD(learning_rate=0.1)
 for i, bootstrap in enumerate(BOOTSTRAPS):
+    bootstrap = bootstrap[:BOOTSTRAP_COUNT]
     inputs = np.array([DATA[i][0] for i in bootstrap])
     expected = np.array([DATA[i][1] for i in bootstrap])
+
 
     inputs = tf.constant(inputs)
     expected = tf.constant(expected)
@@ -105,21 +111,6 @@ for i, bootstrap in enumerate(BOOTSTRAPS):
     elapsed = end - start
     times.append(elapsed)
 
-if OUT_PATH is not None:
-    with open(f"{OUT_PATH}/times.csv", "w") as file:
-        data = [
-            "epoch,time",
-            *[f"\n{index},{elapsed}" for index, elapsed in enumerate(times)],
-        ]
-        file.writelines(data)
 
-    with open(f"{OUT_PATH}/network", "w") as file:
-        data = []
-        for weights, biases in layers:
-            (height, width) = weights.shape
-            data.append(f"{height} {width}\n")
-            data.append(",".join([str(i) for i in biases.numpy()]))
-            data.append("\n")
-            data.append("\n".join([",".join([str(i) for i in row.numpy()]) for row in weights]))
-            data.append("\n\n")
-        file.writelines(data)
+with open(OUT_PATH, "w") as file:
+    file.write("\n".join(f"{index},{elapsed}" for index, elapsed in enumerate(times)))

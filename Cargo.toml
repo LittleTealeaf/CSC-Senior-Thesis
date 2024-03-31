@@ -1,5 +1,5 @@
 [workspace]
-members = ["impl/rust", "impl/rust-tf"]
+members = ["impl/rust"]
 resolver = "2"
 
 [workspace.lints.rust]

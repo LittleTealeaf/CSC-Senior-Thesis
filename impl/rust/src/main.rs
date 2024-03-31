@@ -1,7 +1,7 @@
 use std::{
     env,
-    fs::{create_dir_all, remove_dir_all, File},
-    io::Write,
+    fs::File,
+    io::{Read, Write},
     path::PathBuf,
     time::SystemTime,
 };
@@ -11,28 +11,32 @@ use network::NeuralNetwork;
 mod layer;
 mod network;
 
+fn read_from_file(path: String) -> String {
+    let mut file = File::open(path.clone()).unwrap();
+    let mut s = String::new();
+    println!("{}", path);
+    file.read_to_string(&mut s).unwrap();
+    return s;
+}
+
 fn main() {
     let out_env = env::var("OUT_PATH").ok();
 
-    if let Some(out_path) = &out_env {
-        let _ = remove_dir_all(out_path);
-    }
-
-    let data: Vec<Vec<f64>> = include_str!("../../../data/data.csv")
+    let data: Vec<Vec<f64>> = read_from_file(env::var("DATASET_PATH").unwrap())
         .lines()
         .map(|line| line.split(',').filter_map(|n| n.parse().ok()).collect())
         .collect();
 
     println!("Data Loaded");
 
-    let bootstraps: Vec<Vec<usize>> = include_str!("../../../data/bootstraps.csv")
+    let bootstraps: Vec<Vec<usize>> = read_from_file(env::var("BOOTSTRAP_PATH").unwrap())
         .lines()
         .map(|line| line.split(',').filter_map(|n| n.parse().ok()).collect())
         .collect();
 
     println!("Bootstraps Loaded");
 
-    let mut network = NeuralNetwork::from_str(include_str!("../../../data/network"));
+    let mut network = NeuralNetwork::from_str(&read_from_file(env::var("NETWORK_PATH").unwrap()));
 
     println!("Network Loaded");
 
@@ -53,28 +57,11 @@ fn main() {
     }
 
     if let Some(out_path) = &out_env {
-        let base_path = PathBuf::from(out_path);
+        let path = PathBuf::from(out_path);
+        let mut file = File::create(path).unwrap();
 
-        create_dir_all(&base_path).unwrap();
-
-        {
-            let path = base_path.join("times.csv");
-
-            let mut file = File::create(path).unwrap();
-
-            writeln!(file, "epoch,time").unwrap();
-
-            for (i, time) in times.into_iter().enumerate() {
-                writeln!(file, "{i},{time}").unwrap();
-            }
-        }
-
-        {
-            let path = base_path.join("network");
-
-            let mut file = File::create(path).unwrap();
-
-            network.write_to_file(&mut file).unwrap();
+        for (i, time) in times.into_iter().enumerate() {
+            writeln!(file, "{i},{time}").unwrap();
         }
     }
 }

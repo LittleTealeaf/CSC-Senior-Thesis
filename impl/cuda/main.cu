@@ -365,13 +365,13 @@ public:
 
 int main() {
 
-  Network network = Network(ifstream(getenv("NETWORK")));
+  Network network = Network(ifstream(getenv("NETWORK_PATH")));
   int features = network.features;
 
   vector<double> data;
 
   // Read data file
-  ifstream stream(getenv("DATA"));
+  ifstream stream(getenv("DATASET_PATH"));
   string line;
   while (getline(stream, line)) {
 
@@ -386,15 +386,19 @@ int main() {
   stream.close();
 
   vector<vector<int>> bootstraps;
-  stream = ifstream(getenv("BOOTSTRAP"));
+  stream = ifstream(getenv("BOOTSTRAP_PATH"));
   while (getline(stream, line)) {
     vector<int> choices;
     int index;
-    while ((index = line.find(',')) >= 0) {
-      choices.push_back(stoi(line.substr(0, index)));
-      line = line.substr(index + 1);
+    int count = stoi(getenv("BOOTSTRAP_COUNT"));
+    for(int i = 0; i < count; i++) {
+      if ((index = line.find(',')) >= 0) {
+        choices.push_back(stoi(line.substr(0,index)));
+        line =line.substr(index + 1);
+      } else {
+        choices.push_back(stoi(line));
+      }
     }
-    choices.push_back(stoi(line));
 
     bootstraps.push_back(choices);
   }
@@ -435,9 +439,8 @@ int main() {
       .count());
   }
 
-  ofstream out_file(getenv("OUT_TIMES"));
+  ofstream out_file(getenv("OUT_PATH"));
   if (out_file.is_open()) {
-    out_file << "epoch,time\n";
     for (int i = 0; i < times.size(); ++i) {
       out_file << i << "," << times.at(i) << "\n";
     }
