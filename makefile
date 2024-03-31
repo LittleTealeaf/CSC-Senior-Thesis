@@ -64,6 +64,13 @@ out/cuda: bin/cuda data
 	mkdir out/cuda
 	OUT_TIMES="out/cuda/times.csv" NETWORK="data/network" BOOTSTRAP="data/bootstraps.csv" DATA="data/data.csv"  bin/cuda
 
+# Graphs
+out/img: out/cuda out/python-tf-cpu out/python-tf-gpu out/rust graphs.R
+	rm -r out/img || true
+	mkdir out/img
+	R < graphs.R --no-save
+
+
 # Misc
 data: data.toml data.py
 	python3 data.py

@@ -17,22 +17,30 @@ fn main() {
     if let Some(out_path) = &out_env {
         let _ = remove_dir_all(out_path);
     }
-    
+
     let data: Vec<Vec<f64>> = include_str!("../../../data/data.csv")
         .lines()
         .map(|line| line.split(',').filter_map(|n| n.parse().ok()).collect())
         .collect();
+
+    println!("Data Loaded");
 
     let bootstraps: Vec<Vec<usize>> = include_str!("../../../data/bootstraps.csv")
         .lines()
         .map(|line| line.split(',').filter_map(|n| n.parse().ok()).collect())
         .collect();
 
+    println!("Bootstraps Loaded");
+
     let mut network = NeuralNetwork::from_str(include_str!("../../../data/network"));
+
+    println!("Network Loaded");
 
     let mut times = Vec::new();
 
-    for bootstrap in bootstraps {
+    for (sample_n, bootstrap) in bootstraps.into_iter().enumerate() {
+        println!("Sample {sample_n}");
+
         let data = bootstrap.into_iter().map(|i| &data[i]).collect::<Vec<_>>();
 
         let start = SystemTime::now();
@@ -50,11 +58,11 @@ fn main() {
         create_dir_all(&base_path).unwrap();
 
         {
-            let path = base_path.join("results.csv");
+            let path = base_path.join("times.csv");
 
             let mut file = File::create(path).unwrap();
 
-            writeln!(file, "id,time").unwrap();
+            writeln!(file, "epoch,time").unwrap();
 
             for (i, time) in times.into_iter().enumerate() {
                 writeln!(file, "{i},{time}").unwrap();

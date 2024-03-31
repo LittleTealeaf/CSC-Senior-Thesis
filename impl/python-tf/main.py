@@ -108,7 +108,7 @@ for i, bootstrap in enumerate(BOOTSTRAPS):
 if OUT_PATH is not None:
     with open(f"{OUT_PATH}/times.csv", "w") as file:
         data = [
-            "id,time",
+            "epoch,time",
             *[f"\n{index},{elapsed}" for index, elapsed in enumerate(times)],
         ]
         file.writelines(data)

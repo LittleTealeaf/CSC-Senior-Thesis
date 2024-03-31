@@ -437,7 +437,7 @@ int main() {
 
   ofstream out_file(getenv("OUT_TIMES"));
   if (out_file.is_open()) {
-    out_file << "id,time\n";
+    out_file << "epoch,time\n";
     for (int i = 0; i < times.size(); ++i) {
       out_file << i << "," << times.at(i) << "\n";
     }
