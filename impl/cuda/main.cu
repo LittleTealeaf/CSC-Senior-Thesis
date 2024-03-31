@@ -10,6 +10,16 @@
 
 using namespace std;
 
+
+
+/// @brief Run Feed Forward progress from one layer to the next
+/// @param in (N x F): The input values
+/// @param weights (F x O) + (O x 1): Both the weights (first F x O) and bias (last O x 1)
+/// @param output (N x O): Outputs of the network (before activation function)
+/// @param activations (N x O): Activations of the nodes
+/// @param N number of observations
+/// @param F number of incoming features
+/// @param O number of output nodes
 __global__ void cudaFeedForward(double* in, double* weights, double* output,
                                 double* activations, int N, int F, int O) {
   int n = blockIdx.x * blockDim.x + threadIdx.x;
@@ -31,6 +41,15 @@ __global__ void cudaFeedForward(double* in, double* weights, double* output,
   }
 }
 
+/// @brief Back Propagate for the Output
+/// @param a_j (N x 1): Activations of the previous layer
+/// @param in_o (N x 1): Inputs for output layer
+/// @param a_o (N x 1): Activations for output layer
+/// @param exp (N x 1): Expected values for the output
+/// @param out_error (N x F): Error for the previous nodes
+/// @param out_nudge (F x 1) (1 x 1): Nudges for the weights to the output node
+/// @param N number of observations
+/// @param F number of features from the previous layer
 __global__ void cudaBackPropagateOutput(double* a_j, double* in_o, double* a_o,
                                         double* exp, double* out_error,
                                         double* out_nudge, int N, int F) {
@@ -55,6 +74,18 @@ __global__ void cudaBackPropagateOutput(double* a_j, double* in_o, double* a_o,
   }
 }
 
+/// @brief Cuda Back Propagation for layers that are not the output layer
+/// @param a_i (N x F): Activations for previous layer
+/// @param in_j (N x O): Inputs for current layer
+/// @param a_j (N x O): Activation for current layer
+/// @param w_k (O x P) (P x 1): Weights/Bias for next layer
+/// @param err_k (N x P): Errors for next layer
+/// @param out_nudge (N x ((F x O) + (O x 1))): Nudges for this layer
+/// @param out_err_j (N x O): Errors for this layer
+/// @param N number of observations
+/// @param F features of previous layer
+/// @param O output of current layer
+/// @param P output of next layer
 __global__ void cudaBackPropagation(double* a_i, double* in_j, double* a_j,
                                     double* w_k, double* err_k,
                                     double* out_nudge, double* out_err_j, int N,
@@ -82,6 +113,26 @@ __global__ void cudaBackPropagation(double* a_i, double* in_j, double* a_j,
   }
 }
 
+/// @brief Applies nudges. Note that dim.x needs to range from [0-F]
+/// @param nudges (N x ((F x O) + (O x 1)))
+/// @param weights (F x O) + (O x 1)
+/// @param N
+/// @param F
+/// @param O
+__global__ void cudaApplyNudges(double* nudges, double* weights, int N, int F, int O, double learning_rate) {
+  int f = blockIdx.x * blockDim.x + threadIdx.x;
+  int o = blockIdx.y * blockDim.y + threadIdx.y;
+
+  if (f <= F && o < O) {
+    double nudge = 0.0;
+    for (int n = 0; n < N; n++) {
+      nudge += nudges[n * (F + 1) * O + f * O + o];
+    }
+    nudge *= 0.1 / double(N);
+    weights[f * O + o] += nudge;
+  }
+}
+
 class CudaGrid {
 public:
   dim3 threads;
@@ -91,19 +142,25 @@ public:
 
   CudaGrid(int x, int y) : CudaGrid(x, y, 1) {}
 
-  CudaGrid(int x, int y, int z) : threads(x, y, z), blocks(x, y, z) {
-    if (threads.x > 8) {
-      blocks.x = ceil(double(threads.x) / double(8));
-      threads.x = 8;
-    }
-    if (threads.y > 8) {
-      blocks.y = ceil(double(threads.y) / double(8));
-      threads.y = 8;
-    }
-    if (threads.z > 8) {
-      blocks.z = ceil(double(threads.z) / double(8));
-      threads.z = 8;
-    }
+  CudaGrid(int x, int y, int z) : threads(1, 1, 1), blocks(1, 1, 1) {
+    setX(x);
+    setY(y);
+    setZ(z);
+  }
+
+  void setX(int x) {
+    blocks.x = ceil(double(x) / 8.0);
+    threads.x = min(8, x);
+  }
+
+  void setY(int y) {
+    blocks.y = ceil(double(y) / 8.0);
+    threads.y = min(8, y);
+  }
+
+  void setZ(int z) {
+    blocks.z = ceil(double(z) / 8.0);
+    threads.z = min(8, z);
   }
 };
 
@@ -137,30 +194,23 @@ public:
 };
 
 class NetworkLayer {
-private:
-  CudaTensor weights;
-  CudaTensor bias;
-
 public:
   int input;
   int output;
+  double* cuda;
+
   NetworkLayer(int input, int output)
-    : input(input), output(output), weights(input, output), bias(output, 1) {
+    : input(input), output(output), cuda(nullptr) {
+    cudaMalloc(&this->cuda, (input + 1) * output * sizeof(double));
   }
 
-  void setWeights(double* values) { this->weights.setValues(values); }
-
-  void setBias(double* bias) { this->bias.setValues(bias); }
-
-  void feedForward(double* cuda_in, int observations, double* cuda_out) {
-
-    CudaGrid grid = CudaGrid(this->output, observations);
-    cudaFeedForward << <grid.blocks, grid.threads >> > (cuda_in, this->weights.getCuda(), this->bias.getCuda(), cuda_out, observations, this->input, this->output);
+  void setValues(double* values) {
+    cudaMemcpy(this->cuda, values, (this->input + 1) * this->output * sizeof(double),
+               cudaMemcpyHostToDevice);
   }
 
   void free() {
-    this->weights.free();
-    this->bias.free();
+    cudaFree(this->cuda);
   }
 };
 
@@ -196,7 +246,7 @@ public:
       bias[output - 1] = stod(line);
 
       // Weights
-      double weights[input * output];
+      double weights[(input + 1) * output];
       for (int i = 0; i < input; i++) {
         getline(stream, line);
         for (int o = 0; o < output - 1; o++) {
@@ -208,10 +258,13 @@ public:
       }
       getline(stream, line);
 
+      for (int i = 0; i < output; i++) {
+        weights[input * output + i] = bias[i];
+      }
+
       // Now we pushit into a layer
       NetworkLayer layer = NetworkLayer(input, output);
-      layer.setWeights(weights);
-      layer.setBias(bias);
+      layer.setValues(weights);
       layers.push_back(layer);
     }
     stream.close();
@@ -222,33 +275,84 @@ public:
 
 
   void train(int observations, double* cuda_inputs, double* cuda_expected) {
-
     double* outputs[layer_count];
+    double* activations[layer_count];
 
-    cudaMalloc(&outputs[0],
-               sizeof(double) * layers.at(0).output * observations);
-    layers.at(0).feedForward(cuda_inputs, observations, outputs[0]);
+    {
+      int size = sizeof(double) * layers.at(0).output * observations;
+      cudaMalloc(&outputs[0], size);
+      cudaMalloc(&activations[0], size);
+    }
+
+    CudaGrid grid = CudaGrid(observations, layers.at(0).input);
+
+    // Feed Forward First Layer
+
+    {
+      NetworkLayer* layer = &layers.at(0);
+      cudaFeedForward << <grid.blocks, grid.threads >> > (cuda_inputs, layer->cuda, outputs[0], activations[0], observations, layer->input, layer->output);
+    }
+
+    // Feed Forward Rest
 
     for (int i = 1; i < layer_count; i++) {
-      cudaMalloc(&outputs[i],
-                 sizeof(double) * layers.at(i).output * observations);
-      layers.at(i).feedForward(outputs[i - 1], observations, outputs[i]);
+      NetworkLayer* layer = &layers.at(i);
+      int size = sizeof(double) * layer->output * observations;
+      cudaMalloc(&outputs[i], size);
+      cudaMalloc(&activations[i], size);
+      grid.setY(layer->output);
+
+      cudaFeedForward << <grid.blocks, grid.threads >> > (activations[i - 1], layer->cuda, outputs[i], activations[i], observations, layer->input, layer->output);
+
     }
 
     double* errors[layer_count];
+    double* nudges[layer_count];
 
     for (int i = 0; i < layer_count; i++) {
-      cudaMalloc(&errors[i],
-                 sizeof(double) * observations * layers.at(i).output);
+      NetworkLayer* layer = &layers.at(i);
+      cudaMalloc(&errors[i], sizeof(double) * observations * layer->output);
+      cudaMalloc(&nudges[i], sizeof(double) * observations * layer->output * (layer->input + 1));
     }
 
 
+    // Back Prop Layer Layer
+    {
+      int prev_features = layers.at(layer_count - 2).output;
+      grid.setY(prev_features);
+      cudaBackPropagateOutput << <grid.blocks, grid.threads >> > (activations[layer_count - 2], outputs[layer_count - 1], activations[layer_count - 1], cuda_expected, errors[layer_count - 1], nudges[layer_count - 1], observations, prev_features);
+    }
 
-    cudaFree(cuda_inputs);
-    cudaFree(cuda_expected);
+    // Middle Layers
+
+    for (int i = layer_count - 2; i > 0; i--) {
+      NetworkLayer* layer = &layers.at(i);
+      grid.setY(layer->input);
+      cudaBackPropagation << <grid.blocks, grid.threads >> > (activations[i - 1], outputs[i], activations[i], layers.at(i + 1).cuda, errors[i + 1], nudges[i], errors[i], observations, layer->input, layer->output, layers.at(i + 1).output);
+    }
+
+    // First Layer
+
+    {
+      NetworkLayer* layer = &layers.at(0);
+      grid.setY(layer->input);
+      cudaBackPropagation << <grid.blocks, grid.threads >> > (cuda_inputs, outputs[0], activations[0], layers.at(1).cuda, errors[1], nudges[0], errors[0], observations, layer->input, layer->output, layers.at(1).output);
+    }
+
+    // Apply Nudges
     for (int i = 0; i < layer_count; i++) {
+      NetworkLayer* layer = &layers.at(i);
+      grid.setX(layer->input);
+      grid.setY(layer->output + 1);
+      cudaApplyNudges << <grid.blocks, grid.threads >> > (nudges[i], layer->cuda, observations, layer->input, layer->output, 0.1);
+    }
+
+
+    for (int i = 0;i < layer_count; i++) {
       cudaFree(outputs[i]);
+      cudaFree(activations[i]);
       cudaFree(errors[i]);
+      cudaFree(nudges[i]);
     }
   }
 
