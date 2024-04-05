@@ -34,13 +34,13 @@ out/results/python-tf-gpu: out/data impl/python-tf/main.py ./run.sh out/run/pyth
 	mkdir out 2> /dev/null || true
 	mkdir out/results 2> /dev/null || rm -r out/results/python-tf-gpu 2> /dev/null || true
 	mkdir out/results/python-tf-gpu
-	OUT_PATH="out/results/python-tf-gpu" DATA_PATH="out/data" SCRIPT="out/run/python-tf" bash run.sh
+	OUT_PATH="out/results/python-tf-gpu" DATA_PATH="out/data" SCRIPT="out/run/python-tf" NAME="Python Tesnorflow GPU" bash run.sh
 
 out/results/python-tf-cpu: out/data impl/python-tf/main.py out/run/python-tf ./run.sh
 	mkdir out 2> /dev/null || true
 	mkdir out/results 2> /dev/null || rm -r out/results/python-tf-cpu 2> /dev/null || true
 	mkdir out/results/python-tf-cpu
-	OUT_PATH="out/results/python-tf-cpu" DATA_PATH="out/data" SCRIPT="out/run/python-tf" CUDA_VISIBLE_DEVICES='-1' bash run.sh
+	OUT_PATH="out/results/python-tf-cpu" DATA_PATH="out/data" SCRIPT="out/run/python-tf" CUDA_VISIBLE_DEVICES='-1' NAME="Python Tensorflow CPU" bash run.sh
 
 out/bin/cuda: impl/cuda/main.cu
 	mkdir out 2> /dev/null || true
@@ -56,7 +56,7 @@ out/results/cuda: out/bin/cuda out/data out/run/cuda run.sh
 	mkdir out 2> /dev/null || true
 	mkdir out/results 2> /dev/null || rm -r out/results/cuda 2> /dev/null || true
 	mkdir out/results/cuda
-	OUT_PATH="out/results/cuda" DATA_PATH="out/data" SCRIPT="out/run/cuda" bash run.sh
+	OUT_PATH="out/results/cuda" DATA_PATH="out/data" SCRIPT="out/run/cuda" NAME="Cuda" bash run.sh
 
 out/run/rust:
 	mkdir out 2> /dev/null || true
@@ -67,7 +67,7 @@ out/results/rust: out/data $(wildcard impl/rust/src/*.rs) out/run/rust run.sh
 	mkdir out 2> /dev/null || true
 	mkdir out/results 2> /dev/null || rm -r out/results/rust 2> /dev/null || true
 	mkdir out/results/rust
-	OUT_PATH="out/results/rust" DATA_PATH="out/data" SCRIPT="out/run/rust" bash run.sh
+	OUT_PATH="out/results/rust" DATA_PATH="out/data" SCRIPT="out/run/rust" NAME="Rust" bash run.sh
 
 ##############################################
 
