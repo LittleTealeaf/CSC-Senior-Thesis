@@ -30,17 +30,15 @@ out/run/python-tf:
 	mkdir out/run 2> /dev/null || true
 	echo "python3 impl/python-tf/main.py" > out/run/python-tf
 
-out/results/python-tf-gpu: out/data impl/python-tf/main.py ./run.sh out/run/python-tf
+out/results/python-tf-gpu.csv: out/data impl/python-tf/main.py ./run.sh out/run/python-tf
 	mkdir out 2> /dev/null || true
-	mkdir out/results 2> /dev/null || rm -r out/results/python-tf-gpu 2> /dev/null || true
-	mkdir out/results/python-tf-gpu
-	OUT_PATH="out/results/python-tf-gpu" DATA_PATH="out/data" SCRIPT="out/run/python-tf" NAME="Python Tesnorflow GPU" bash run.sh
+	mkdir out/results 2> /dev/null || true
+	OUT_FILE="out/results/python-tf-gpu.csv" DATA_PATH="out/data" SCRIPT="out/run/python-tf" NAME="Python Tesnorflow GPU" bash run.sh
 
-out/results/python-tf-cpu: out/data impl/python-tf/main.py out/run/python-tf ./run.sh
+out/results/python-tf-cpu.csv: out/data impl/python-tf/main.py out/run/python-tf ./run.sh
 	mkdir out 2> /dev/null || true
-	mkdir out/results 2> /dev/null || rm -r out/results/python-tf-cpu 2> /dev/null || true
-	mkdir out/results/python-tf-cpu
-	OUT_PATH="out/results/python-tf-cpu" DATA_PATH="out/data" SCRIPT="out/run/python-tf" CUDA_VISIBLE_DEVICES='-1' NAME="Python Tensorflow CPU" bash run.sh
+	mkdir out/results 2> /dev/null || true
+	OUT_FILE="out/results/python-tf-cpu.csv" DATA_PATH="out/data" SCRIPT="out/run/python-tf" CUDA_VISIBLE_DEVICES='-1' NAME="Python Tensorflow CPU" bash run.sh
 
 out/bin/cuda: impl/cuda/main.cu
 	mkdir out 2> /dev/null || true
@@ -52,22 +50,29 @@ out/run/cuda:
 	mkdir out/run 2> /dev/null || true
 	echo "./out/bin/cuda" > out/run/cuda
 
-out/results/cuda: out/bin/cuda out/data out/run/cuda run.sh
+out/results/cuda.csv: out/bin/cuda out/data out/run/cuda run.sh
 	mkdir out 2> /dev/null || true
-	mkdir out/results 2> /dev/null || rm -r out/results/cuda 2> /dev/null || true
-	mkdir out/results/cuda
-	OUT_PATH="out/results/cuda" DATA_PATH="out/data" SCRIPT="out/run/cuda" NAME="Cuda" bash run.sh
+	mkdir out/results 2> /dev/null || true
+	OUT_FILE="out/results/cuda.csv" DATA_PATH="out/data" SCRIPT="out/run/cuda" NAME="CUDA" bash run.sh
 
 out/run/rust:
 	mkdir out 2> /dev/null || true
 	mkdir out/run 2> /dev/null || true
 	echo "cargo run --release -p rust-impl" > out/run/rust
 
-out/results/rust: out/data $(wildcard impl/rust/src/*.rs) out/run/rust run.sh
+out/results/rust.csv: out/data $(wildcard impl/rust/src/*.rs) out/run/rust run.sh
 	mkdir out 2> /dev/null || true
-	mkdir out/results 2> /dev/null || rm -r out/results/rust 2> /dev/null || true
+	mkdir out/results 2> /dev/null || true
 	mkdir out/results/rust
-	OUT_PATH="out/results/rust" DATA_PATH="out/data" SCRIPT="out/run/rust" NAME="Rust" bash run.sh
+	OUT_FILE="out/results/rust.csv" DATA_PATH="out/data" SCRIPT="out/run/rust" NAME="Rust" bash run.sh
+
+out/results/data.csv: out/results/rust.csv out/results/cuda.csv out/results/python-tf-gpu.csv out/results/python-tf-cpu.csv
+	echo "epoch,time,variables,bootstraps,model" > out/results/data.csv
+	echo out/results/rust.csv >> out/results/data.csv
+	echo out/results/cuda.csv >> out/results/data.csv
+	echo out/results/python-tf-gpu.csv >> out/results/data.csv
+	echo out/results/python-tf-cpu.csv >> out/results/data.csv
+	
 
 ##############################################
 

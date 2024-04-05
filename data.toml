@@ -1,4 +1,4 @@
-variables = { min = 1, max = 1001, step = 100 }
+variables = { min = 2, max = 1001, step = 100 }
 observations = 1000
 bootstrap = { min = 10, max = 1001, step = 100 }
 samples = 100
