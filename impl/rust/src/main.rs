@@ -42,8 +42,7 @@ fn main() {
 
     let mut times = Vec::new();
 
-    for (sample_n, bootstrap) in bootstraps.into_iter().enumerate() {
-        println!("Sample {sample_n}");
+    for (_sample_n, bootstrap) in bootstraps.into_iter().enumerate() {
 
         let data = bootstrap.into_iter().map(|i| &data[i]).collect::<Vec<_>>();
 
