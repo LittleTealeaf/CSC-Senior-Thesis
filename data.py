@@ -12,6 +12,8 @@ with open("data.toml", "rb") as file_bootstraps:
 
 os.mkdir(os.path.join("out", "data", "vars"))
 
+# TODO: Change the ranges to variables
+
 print("Generating Index")
 with open(os.path.join("out", "data", "index"), "w") as var_index:
     var_index.write(

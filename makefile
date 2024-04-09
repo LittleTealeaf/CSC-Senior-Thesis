@@ -33,7 +33,7 @@ out/run/python-tf:
 out/results/python-tf-gpu.csv: out/data impl/python-tf/main.py ./run.sh out/run/python-tf
 	mkdir out 2> /dev/null || true
 	mkdir out/results 2> /dev/null || true
-	OUT_FILE="out/results/python-tf-gpu.csv" DATA_PATH="out/data" SCRIPT="out/run/python-tf" NAME="Python Tesnorflow GPU" bash run.sh
+	OUT_FILE="out/results/python-tf-gpu.csv" DATA_PATH="out/data" SCRIPT="out/run/python-tf" NAME="Python Tensorflow GPU" bash run.sh
 
 out/results/python-tf-cpu.csv: out/data impl/python-tf/main.py out/run/python-tf ./run.sh
 	mkdir out 2> /dev/null || true
@@ -63,16 +63,15 @@ out/run/rust:
 out/results/rust.csv: out/data $(wildcard impl/rust/src/*.rs) out/run/rust run.sh
 	mkdir out 2> /dev/null || true
 	mkdir out/results 2> /dev/null || true
-	mkdir out/results/rust
 	OUT_FILE="out/results/rust.csv" DATA_PATH="out/data" SCRIPT="out/run/rust" NAME="Rust" bash run.sh
 
 out/results/data.csv: out/results/rust.csv out/results/cuda.csv out/results/python-tf-gpu.csv out/results/python-tf-cpu.csv
 	echo "epoch,time,variables,bootstraps,model" > out/results/data.csv
-	echo out/results/rust.csv >> out/results/data.csv
-	echo out/results/cuda.csv >> out/results/data.csv
-	echo out/results/python-tf-gpu.csv >> out/results/data.csv
-	echo out/results/python-tf-cpu.csv >> out/results/data.csv
-	
+	cat out/results/rust.csv >> out/results/data.csv
+	cat out/results/cuda.csv >> out/results/data.csv
+	cat out/results/python-tf-gpu.csv >> out/results/data.csv
+	cat out/results/python-tf-cpu.csv >> out/results/data.csv
+
 
 ##############################################
 
@@ -81,7 +80,7 @@ out/results/data.csv: out/results/rust.csv out/results/cuda.csv out/results/pyth
 
 
 # Graphs
-out/graphs: out/results/cuda out/results/python-tf-cpu out/results/python-tf-gpu out/results/rust graphs.R
+out/graphs: out/results/data.csv graphs.R
 	rm -r out/graphs || true
 	mkdir out/graphs
 	R < graphs.R --no-save
