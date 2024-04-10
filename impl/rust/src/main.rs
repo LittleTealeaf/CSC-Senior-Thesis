@@ -1,9 +1,5 @@
 use std::{
-    env,
-    fs::File,
-    io::{Read, Write},
-    path::PathBuf,
-    time::SystemTime,
+    env, fs::File, io::{Read, Write}, path::PathBuf, time::SystemTime
 };
 
 use network::NeuralNetwork;

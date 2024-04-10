@@ -5,8 +5,9 @@ df <- read.csv("out/results/data.csv")
 
 plot <- ggplot(
   data = df %>%
+  mutate(time_log = log(time)) %>%
   group_by(variables, model) %>%
-  summarize(time = mean(time)),
+  summarize(time = mean(time_log)),
   mapping = aes(x = variables, y = time, color = model)
 ) +
   geom_smooth() +
