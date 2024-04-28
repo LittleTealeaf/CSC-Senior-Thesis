@@ -4,6 +4,9 @@ library(ggrepel)
 
 df <- read.csv("out/results/data.csv")
 
+h <- 7
+w <- 10
+
 ggsave(
   plot = ggplot(
     data = df %>%
@@ -20,8 +23,8 @@ ggsave(
     ) +
     ggtitle("Average Time by Variable Dimension"),
   file = "thesis/svg/variables.svg",
-  height = 5,
-  width = 7,
+  height = h,
+  width = w,
 )
 
 
@@ -41,6 +44,6 @@ ggsave(
     ) +
     ggtitle("Average Time by Observation Count"),
   file = "thesis/svg/bootstraps.svg",
-  height = 5,
-  width = 7,
+  height = h,
+  width = w,
 )
