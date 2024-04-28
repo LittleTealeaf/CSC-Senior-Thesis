@@ -114,7 +114,7 @@ public:
     : input(input), output(output), weights(input, output), bias(output, 1) {
   }
 
-  void setWeights(double* values) { this->weights.setValues(values); }
+  void setValues(double* values) { this->weights.setValues(values); }
 
   void setBias(double* bias) { this->bias.setValues(bias); }
 
@@ -186,7 +186,7 @@ public:
 
       // Now we pushit into a layer
       NetworkLayer layer = NetworkLayer(input, output);
-      layer.setWeights(weights);
+      layer.setValues(weights);
       layer.setBias(bias);
       layers.push_back(layer);
     }
