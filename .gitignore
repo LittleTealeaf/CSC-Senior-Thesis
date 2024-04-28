@@ -5,3 +5,5 @@ out/results
 out/run
 target/
 bin/
+out/
+!out/graphs
