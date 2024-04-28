@@ -10,7 +10,7 @@
 \doublespacing
 
 \author{Thomas Kwashnak}
-\title{Senior Thesis}
+\title{Comparing Machine Learning Libraries to Manual Implementations}
 
 \newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +} }
 
@@ -67,8 +67,8 @@ Then, a bootstrapped set of observations is fed into the network, along with the
 This process repeats for various combinations of variable counts, or the number of variables in the input vector, and observation counts, or the number of concurrent observations being proessed at one time.
 
 \paragraph{Rust}
-The Rust \cite{lang_rust} implementation acts as the manual CPU implementation.
-It uses the Rust standard libraries along with the Rayon crate \cite{lib_rayon}, which provides APIs to simplify multi-threading Rust code.
+The Rust implementation acts as the manual CPU implementation.
+It uses the Rust \cite{lang_rust} standard libraries along with the Rayon crate \cite{lib_rayon}, which provides APIs to simplify multi-threading Rust code.
 The only use of parallel computing within the Rust codebase is to parallelize across observations.
 That is to say that the neural network itself is not parallelized, and is a very basic implementation.
 
@@ -89,23 +89,27 @@ The framework is utilized through Python \cite{lang_python}, a popular language 
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 
 \begin{figure}[h]
-    \includesvg[width=\linewidth]{svg/variables}
-    \caption{Graph}
-    \label{fig:graph_variables}
+	\begin{center}
+		% \includesvg[width=\linewidth]{svg/variables}
+		\includegraphics[width=\linewidth]{variables.png}
+	\end{center}
+	\caption{Average execution time related to the number of variables in the input vector. Lower time is better. Time is scaled on a $\log10$ scale to show the models relations to eachother.}
+	\label{fig:graph_variables}
 \end{figure}
 
 
 \begin{figure}[h]
-    \includesvg[width=\linewidth]{svg/bootstraps}
-    \caption{Graph}
-    \label{fig:graph_bootstraps}
+	\begin{center}
+    % \includesvg[width=\linewidth]{svg/bootstraps}
+		\includegraphics[width=\linewidth]{bootstraps.png}
+	\end{center}
+	\caption{Graph}
+	\label{fig:graph_bootstraps}
 \end{figure}
 
 As with Figure \ref{fig:graph_bootstraps} and Figure \ref{fig:graph_variables}
 
 \section{Discussion}
-
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 
 
 \section{Conclusion}
