@@ -20,7 +20,7 @@ ggsave(
     ) +
     ggtitle("Average Time by Variable Dimension"),
   file = "thesis/svg/variables.svg",
-  height = 4,
+  height = 5,
   width = 7,
 )
 
@@ -41,6 +41,6 @@ ggsave(
     ) +
     ggtitle("Average Time by Observation Count"),
   file = "thesis/svg/bootstraps.svg",
-  height = 4,
+  height = 5,
   width = 7,
 )
