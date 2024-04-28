@@ -20,8 +20,7 @@ ggsave(
     theme_bw() +
     theme(
       legend.position = c(0.7, 0.25),
-    ) +
-    ggtitle("Average Time by Variable Dimension"),
+    ),
   file = "thesis/svg/variables.svg",
   height = h,
   width = w,
@@ -41,8 +40,7 @@ ggsave(
     theme_bw() +
     theme(
       legend.position = c(0.7, 0.25),
-    ) +
-    ggtitle("Average Time by Observation Count"),
+    ),
   file = "thesis/svg/bootstraps.svg",
   height = h,
   width = w,
