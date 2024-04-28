@@ -4,8 +4,8 @@ library(ggrepel)
 
 df <- read.csv("out/results/data.csv")
 
-h <- 15
-w <- 20
+h <-10
+w <- 12
 
 ggsave(
   plot = ggplot(
