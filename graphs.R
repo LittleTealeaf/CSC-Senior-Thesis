@@ -6,8 +6,8 @@ df <- read.csv("out/results/data.csv")
 
 h <-9
 w <- 12
-h1 <- 4
-w1 <- 5
+h1 <- 5
+w1 <- 7
 
 plot <- ggplot(
     data = df %>%
