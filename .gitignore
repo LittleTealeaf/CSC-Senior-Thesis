@@ -1,4 +1,7 @@
 data/
-out/
+out/bin
+out/data
+out/results
+out/run
 target/
 bin/
