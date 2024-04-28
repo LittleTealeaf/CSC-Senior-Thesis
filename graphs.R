@@ -4,7 +4,7 @@ library(ggrepel)
 
 df <- read.csv("out/results/data.csv")
 
-h <- 7
+h <- 8
 w <- 10
 
 ggsave(
