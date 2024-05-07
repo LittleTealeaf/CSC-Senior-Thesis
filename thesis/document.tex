@@ -18,18 +18,22 @@
 
 \newpage
 
-
-\begin{itemize}
-	\item Note, paragraphs are labeled, but labels will mostly be removed at the end
-	\item Most of the paper is in bullet form. I spent most of this week working on the Data Science paper, so being able to write out each section shouldn't be too hard (Yes, I might have a long introduction... I had to do that for the Data Science paper too)
-\end{itemize}
-
-
 \section{Abstract}
+
+Machine learning often uses simple-to-use languages and libraries such as Python and TensorFlow.
+While learning and using these frameworks may be easier, there is the possibility that some overhead cost is assumed.
+While seemingly small, if a model using these frameworks is brought into production, the time lost can easily build up to an actual cost increase for running.
+This paper seeks to understand the difference, if any, between using these frameworks and manually implementing the algorithm in bare-bones code.
+Implenetations of a neural network back propagation algorithm is implemented in Rust, Python with TensorFlow, and CUDA/\CC, and the run-time is compared on identical datasets.
+The results indicate that the raw CUDA performed thousands of times better than the TensorFlow, which performed significantly better than the manual Rust implementation.
+Thus, the conclusion is drawn that in performance-critical applications, spending time manually implementing the model has the potential to have long-term cost savings.
+However, it should not be disregarded the ability for rapid prototyping and quick implementation that TensorFlow and Python provides.
+
 
 \section{Introduction}
 
-\paragraph{Intro Paragraph}
+% \paragraph{Intro Paragraph}
+\paragraph{}
 Machine learning is a quickly-growing industry with the recent boom of generative AI.
 Many companies and organizations are quickly trying to use these machine learning frameworks for their own purposes.
 However, these models are expensive, and can quickly spike up server cost to run.
@@ -37,8 +41,8 @@ These machine learning implementations are often using libraries such as TensorF
 These libraries handle a significant amount of the underlying methods used, and provide the ability to even utilize a GPU if it has the correct framework.
 However, these libraries are mainly interacted with through the Python language \cite{lang_python}, which is often noted to be a slow language.
 
-\paragraph{Review of Python as a growing language / use in Data Science}
-
+% \paragraph{Review of Python as a growing language / use in Data Science}
+\paragraph{}
 Python has been one of the fastest growing languages in the industry today \cite{article_python_growing_language}.
 Srinath, in their paper discussing Python's growing popularity, discusses several factors that lead to Python's success.
 The Python language is an interpreted and dynamically typed language.
@@ -49,8 +53,8 @@ The only drawback to Python is that it sacrifices speed for the ability to be as
 This can be partially mitigated, as Python allows building Python libraries from \CC  or other languages.
 However, this doesn't fully eradicate the drawbacks to a dynamically typed interpreted language.
 
-\paragraph{Review Compiled vs Interpreted Language}
-
+% \paragraph{Review Compiled vs Interpreted Language}
+\paragraph{}
 There are three general types of translation modes for programming languages; interpreted, hybrid, and compiled \cite{article_compiled_interpreted_hybrid_languages}.
 Python, and other similar languages, fall under the interpreted category.
 Interpreted languages are typically taken line by line, executed immediately.
@@ -64,8 +68,9 @@ However, they sacrifice execution time as additional checks and parsing happens 
 Compiled languages, however, are typically more strict with syntax, but they provide significantly better runtime performance than interpreted or hybrid languages.
 That is to say, that code written in C and \CC are typcially faster to run than Python, but may be more difficult to impement or iterate on because of the language syntax and patterns.
 
-\paragraph{Review of Deep Learning Framework Debt}
+% \paragraph{Review of Deep Learning Framework Debt}
 
+\paragraph{}
 Libraries are pre-built collections of code that make it easier for developers to implement and perform certain tasks.
 Often times, libraries are generalized to be used in a multitude of situations.
 Thus, it's also important that these libraries are as efficient as they can be.
@@ -77,82 +82,126 @@ The conclusion is that these widely used libraries aren't without defects and sh
 Thus indicating that use of these frameworks may assume some overhead.
 
 
-\paragraph{Review of Neural Networks}
+% \paragraph{Review of Neural Networks}
 
+\paragraph{}
 Neural networks is a category of mathematical models under machine learning that loosely attempts to mimick the brain \cite{book_intro_neural_networks}.
 They are composed of nodes, or neurons, that accept multiple inputs from previous nodes, each value weighted by some unique weight, and outputs some value based on the inputs.
 Neural networks have the ability to drastically increase its size, in turn increasing the time it may take to run the model on a given inputs.
 The architecture of neural networks lends itself well to being represented using linear algebra, which itself lends nicely to parallelization and other optimizations.
 
-% \paragraph{Review of Convolutional Neural Networks Survey}
-% Neural networks are complicated models that are able 
-
-\paragraph{Review of performance analysis of GPU CNN}
-
-% Source \cite{article_performance_analysis_gpu_cnn}
-
-\paragraph{Summarize the problem statement}
-
-\paragraph{Discuss what this paper explores}
+% \paragraph{Summarize the problem statement
+\paragraph{}
+In the data science industry, many times models using TensorFlow or PyTorch are sent into production without additional optimization.
+The question lies in how much performance impact, if any, does this entail.
+That is, what is the balance between being able to develop quickly, or avoiding interpreted languages and large libraries to hopefully improve execution performance.
+This paper seeks to explore the performance difference between manual implementations on both the GPU and CPU, compared to implementations using Python \cite{lang_python} and TensorFlow \cite{lib_tensorflow} when using either the GPU or CPU.
 
 \section{Methods}
 
-\paragraph{Initial Discussion of Methods}
+% \paragraph{Initial Discussion of Methods}
 
+\paragraph{}
 To test the performance difference between manual implementations and the TensorFlow library, an identical algorithm was implemented in multiple different frameworks and languages.
 This includes CUDA \cite{lib_cuda}, which runs on the GPU, TensorFlow \cite{lib_tensorflow}, which runs on either the GPU or CPU, and Rust \cite{lang_rust}, which acts as the CPU implementation.
 While identical algorithms were not feasable to implement during the alloted time frame, each algorithm attempts to be as fast is it can be for the particular framework.
 The algorithm chosen is a simple back-propagation neural network.
 This allows for experimenting with the number of variables and size of the network, as well as the number of observations being concurrently processed at once.
 
-\paragraph{Experiment design}
 
-\begin{itemize}
-	\item Discuss generated data
-	\item Mention hardware used to test methods. Especially with WSL
-	\item Discuss the parameters (number of iterations, sizes, etc) used for the data presented
-	\item Either here or in every section discuss what is measured (loading data into GPU is not)
-\end{itemize}
+\paragraph{Neural Network}
+
+The main algorithm implemented in this paper is neural network back propagation.
+The neural network used in this paper is a dense neural network with 6 hidden layers, each with the same number of nodes as there are input variables.
+The output layer only contains a singular node, which is what we will be testing against.
+
+Back propagation is one of the main methods of training neural networks.
+In back propagation, the neural network is fed a set of inputs.
+It then compares the value it gets from the output node with the expected value of the output node.
+The back propagation algorithm then propagates the error back through the neural network, calculating the error of each weight and bias.
+The weights and biases are then updated to try and reduce the error for the provided inputs.
+In this paper, several inputs are provided at once, and the weights and biases are nudged based on the average error of all observations.
+
+While this process is not exactly the same in each of the implementation, it is done close enough to compare how fast each implementation is able to run the model.
+Because we are focusing on execution time and not accuracy of the model, the implementations may not be exactly the same, but should roughly have the same runtime needed for each proper implementation.
+
 
 \paragraph{Data Generation}
+In order to maintain as much consistency between the implemented models, a central dataset and values are created and used by each of the implementations.
+The dataset is completely randomly generated using Python \cite{lang_python}, and configured using a TOML file.
 
-How the data is generated (with the Python script)
-\begin{itemize}
-	\item Parameters / Configuration
-	\item Sending it to files to be parsed by the implementations
-	\item Discuss the scripts used to iteratively pass the data as environment parameters to each model (either here or in prior section)
-\end{itemize}
+There are two scaling sliders in the data generating process; Number of variables and number of observations.
+The number of variables handles how many inputs there are in the input of the neural network, as well as how large the hidden layers are.
+The number of observations handles how many entries are sampled from the dataset during each iteration.
 
-\paragraph{Rust Implementation}
+The data generation script outputs several artifacts used by the models.
+First, it outputs a separate dataset for each number of variables.
+It also outputs the size and initial weights and values of the neural network itself.
+Then, it generates bootstrap samples from the original dataset.
+Each bootstrap sample contains a list of indexes from the dataset to pull for that iteration.
+To grab a bootstrapped sample of the specified number of observations, the first $n$ indexes from the bootstrap are gathered.
 
-\begin{itemize}
-	\item Custom implementation of back propagation (Unsure how far into detail I'll go here)
-	\item Parallelized using Rayon \cite{lib_rayon} over observations (key point for discussion)
-\end{itemize}
+Each implementation of the neural network back propagation algorithm accepts environment variables that point the code to where it should grab the data from.
+A Bash script is used to iterative run each model for each of the combinations of observation counts and variable counts.
 
-\paragraph{CUDA Implementation}
+\paragraph{Rust}
 
-
-\begin{itemize}
-	\item Implements a similar version to Rust's back propagation but slightly different
-	\item Is multithreaded across all dimensions, including both the number of variables and the number of observations (Note: get better labels for these?)
-\end{itemize}
-
-\paragraph{Python (TensorFlow) implementation}
-
-\begin{itemize}
-	\item Network is built using variable tensors
-	\item TensorFlow allows manually overriing the avalilable GPUs, so the TensorFlow implementation is used on both the GPU and CPU
-\end{itemize}
+The Rust \cite{lang_rust} implementation acts as the CPU implementation within this paper.
+Custom structs are made to handle each individual layer and the collection of layers together.
+The weights and values are stored in 64-bit floats to provide as much precision as possible.
+The feed-forward and back-propagation algorithms are implemented in the individual layers.
+It should be noted that the back-propagation algorithm here does not change the values within the layer itself, but rather returns a new layer of nudges.
+This allows for the model to be parallelized across observations, achieved by using the Rayon \cite{lib_rayon} crate.
+After the observations are completed, the nudges are combined to obtain the ``average changes'' required for the model.
+It is then properly scaled and applied to the neural network weights and values.
 
 
-\paragraph{Analysis Stage}
+\paragraph{CUDA}
 
+CUDA \cite{lib_cuda} is a specialized extension of \CC \cite{lang_c++} used to interact with supported NVIDIA GPUs.
+The main beneift of using NVIDIA GPUs is the ability to create a Kernel, or set of code that runs fully parallel across several dimensions \cite{lib_cuda}.
+This kind of optimization significantly shows its prowess with algorithms such as back-propagation.
+In the CUDA implementation, the algorithm is parallelized across both the observations and number of variables being processed at that time.
+This is done by splitting up the algorithm into multiple kernels.
+First, feed forward is implemented as a kernel that pushes data from one layer to the next.
+Then, a separate back propagation method is created to handle back propagating from the output node, since additional simplifications can be made.
+For the rest of the layers, a more general back propagation kernel is used.
+The back propagation process, similar to the Rust implementation, outputs several `nudge' vectors that contain the changes needed to make towards the weights and biases.
+The final kernel handles applying those nudges to the weights and biases in the network.
+In the implementation, 1-dimensional arrays are used to simplify the parameters, but they are still treated as if they were 2-dimensional arrays.
+Finally, doubles are used for the weights to maintain the precision, similar to the Rust implementation.
 
-\begin{itemize}
-	\item Data compounded into single dataset using bash script
-	\item Data then loaded into R \cite{lang_r} and graphed using ggplot2 \cite{lib_ggplot2}.
-\end{itemize}
+\paragraph{TensorFlow}
+
+The TensorFlow \cite{lib_tensorflow} implementation is implemented using a Python \cite{lang_python} script.
+This implementation is remarkably different than the other two implementations given the particular way that TensorFlow accomplishes its tasks.
+TensorFlow uses a graph-like model to optimize the calculation process, meaning that features such as back propagation doesn't need to be manually implemented.
+In short, the implementation in Python runs the neural network's feed forward algorithm, calculates the loss based on the result, and uses gradient descent to update the weights and biases within the neural network.
+While there are more encompassing implementations such as Keras, the goal of this implementation is an as-bare-bones implementation as possible of a back propagation neural network.
+
+TensorFlow has the unique ability of running on both the GPU and CPU.
+Thus, the TensorFlow implementation is able to be run twice, once on the GPU and again on the CPU.
+By default, TensorFlow runs on the GPU, if any.
+In order to negate this default behavior, the environment variable CUDA\_VISIBLE\_DEVICES is set to $-1$.
+This forces TensorFlow to default back to the CPU-based implementation.
+
+\paragraph{Running the Experiment}
+
+The final experiment run in this model had the following configuration.
+The number of observations initially generated is 1,000 observations.
+Each dataset of observations ranged from 10 to 1,000 variables.
+The implemented models were recorded in running 50 iterations, each time training on between 10 and 200 observations simultaneously.
+The neural network consisted of 6 layers, each layer with an equal number of nodes to the number of variables in the data.
+
+The experiment was run on a Windows 11 desktop using WSL.
+The computer consisted of an AMD Ryzen 9 5900X CPU and a NVIDIA RTX 3080 GPU with 32GB of ram, and 10GB of VRAM on the GPU.
+
+In tracking the average execution time for each implementation, data loading and unloading was not tracked.
+That is, the variables and data is loaded into the GPU or RAM before the timer starts, and is unloaded after the timer ends.
+This keeps the measured time closer to just focusing on the time taken to execute the entire process.
+
+Once the data is collected, it is combined into a single CSV dataset using a simple Bash script.
+It is then loaded into R \cite{lang_r} and graphed using the R libary ggplot2 \cite{lib_ggplot2}.
 
 \section{Results}
 
@@ -174,24 +223,27 @@ Yes, the figures need to be fixed
 
 \section{Discussion (and conclusion, but may push conclusion to separate section)}
 
-Points to discuss:
 
-\begin{itemize}
-	\item Significant difference between CUDA and Tensorflow Performance
-	\item Difference between TensorFlow and Rust implementations (Additional performance can still be gained in CPU implementation)
-	\item Multithreading across observations was in all algorithms, so observation size did  not affect the runtime as much as the variable count
-	\item Discuss that some of the difference between TensorFlow and CUDA is due to Python. additional exploration could include implementing TensorFlow (in Rust with their Rust bindings, or in C++)
-	\item Discuss the amount of time needed to implement CUDA vs TensorFlow, maybe Rust but that sortof fell inbetween the two
-\end{itemize}
+
+
+% Points to discuss:
+%
+% \begin{itemize}
+% 	\item Significant difference between CUDA and Tensorflow Performance
+% 	\item Difference between TensorFlow and Rust implementations (Additional performance can still be gained in CPU implementation)
+% 	\item Multithreading across observations was in all algorithms, so observation size did  not affect the runtime as much as the variable count
+% 	\item Discuss that some of the difference between TensorFlow and CUDA is due to Python. additional exploration could include implementing TensorFlow (in Rust with their Rust bindings, or in C++)
+% 	\item Discuss the amount of time needed to implement CUDA vs TensorFlow, maybe Rust but that sortof fell inbetween the two
+% \end{itemize}
 
 \section{Conclusion}
 
-\begin{itemize}
-	\item TensorFlow excels at quick implementation and testing, and does it well enough
-	\item However, in production for time-critical applications, manual implementations out-perform by a long shot.
-	\item Sortof like a tradeoff between time spent in implementation and time spent in experimentation
-\end{itemize}
-
+% \begin{itemize}
+% 	\item TensorFlow excels at quick implementation and testing, and does it well enough
+% 	\item However, in production for time-critical applications, manual implementations out-perform by a long shot.
+% 	\item Sortof like a tradeoff between time spent in implementation and time spent in experimentation
+% \end{itemize}
+%
 
 \newpage
 \bibliographystyle{ieeetr}

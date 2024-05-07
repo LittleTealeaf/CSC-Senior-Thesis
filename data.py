@@ -1,6 +1,5 @@
 from random import Random
 
-import shutil
 import os
 import tomllib
 
