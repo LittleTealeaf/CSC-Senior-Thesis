@@ -205,13 +205,12 @@ It is then loaded into R \cite{lang_r} and graphed using the R libary ggplot2 \c
 
 \section{Results}
 
-Yes, the figures need to be fixed
-
 \begin{figure}
 	\begin{center}
 		\includesvg[width=0.8\linewidth]{svg/variables.svg}
 	\end{center}
 	\caption{Model training based on the variable count... (FINISH)}
+	\label{fig:graph:variables}
 \end{figure}
 
 \begin{figure}
@@ -219,9 +218,32 @@ Yes, the figures need to be fixed
 		\includesvg[width=0.8\linewidth]{svg/bootstraps.svg}
 	\end{center}
 	\caption{Model Training based on the observation size}
+	\label{fig:graph:observations}
 \end{figure}
 
-\section{Discussion (and conclusion, but may push conclusion to separate section)}
+\paragraph{}
+Figure \ref{fig:graph:variables} depicts the average time taken for each of the models based on the number of variables, and therefore the size of the network.
+At very low variable counts, all the models had a relatively similar average runtime.
+However, as the number of variables increases, the models seem to diverge significantly.
+Rust, the slowest at high variable count, increases exponentially as more variables are added.
+In higher variable counts, it increased to an average of over 1 second per iteration.
+The TensorFlow on the CPU was the second slowest implementation.
+Similar to Rust, the average runtime exponentially increases as varaibles are added.
+However, the rate that the Tensorflow CPU runtime increases is significantly slower than Rust, so while it starts out slower than Rust, it quickly becomes nearly hundreds of times faster than Rust.
+Tensorflow on the GPU makes almost no visible change in runtime.
+It consistently maintains around 5 ms average execution time.
+However, it proves to be significantly slower compared to CUDA, which presented interesting behavior.
+In very low variable counts, CUDA had a slower runtime more in line with the other implementations.
+However, it quickly drops down and plateaus to significantly lower than any of the other implementations.
+In higher iterations, the CUDA implementation performed 1,000x or so bette than TensorFlow on the GPU, the second fastest implementations.
+
+\paragraph{}
+Figure \ref{fig:graph:observations} show the average time taken for each of the models based on the number of observations concurrently trained on for each of the iterations.
+Each of the implementations had very little difference in runtime when the number of observations changed.
+The only implementation that showed any noticeable difference was the TensorFlow implementation when running on the CPU, where the runtime slowly increased as more observations were added.
+However, the increase is significantly lower than those shown in Figure \ref{fig:graph:variables}.
+
+\section{Discussion}
 
 
 
