@@ -3,14 +3,13 @@
 \usepackage[margin=1in]{geometry}
 \usepackage[nottoc]{tocbibind}
 \usepackage{setspace}
-\usepackage{svg}
 
 \doublespacing
 
 \author{Thomas Kwashnak}
 \title{Senior Thesis}
 
-\newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf + }}
+\newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +}}
 
 \begin{document}
 
@@ -18,153 +17,48 @@
 
 \newpage
 
-
-\begin{itemize}
-	\item Note, paragraphs are labeled, but labels will mostly be removed at the end
-	\item Most of the paper is in bullet form. I spent most of this week working on the Data Science paper, so being able to write out each section shouldn't be too hard (Yes, I might have a long introduction... I had to do that for the Data Science paper too)
-\end{itemize}
-
+\newpage
 
 \section{Abstract}
 
 \section{Introduction}
 
-\paragraph{Intro Paragraph}
 
-\paragraph{Review of Python as a growing language / use in Data Science}
-
-Python has been one of the fastest growing languages in the industry today \cite{article_python_growing_language}.
-Srinath, in their paper discussing Python's growing popularity, discusses several factors that lead to Python's success.
-The Python language is an interpreted and dynamically typed language.
-This, along with the very simple syntax, makes Python very quick to learn and start using.
-It's highly extensible, and many mature libraries and frameworks that make even some complex tasks trivially easy to implement in Python.
-One of the industries that Python continues to excel at is the data science and engineering community, where libraries in Python simplify working with databases or datasets.
-The only drawback to Python is that it sacrifices speed for the ability to be as flexible as it is.
-This can be partially mitigated, as Python allows building Python libraries from \CC  or other languages.
-However, this doesn't fully eradicate the drawbacks to a dynamically typed interpreted language.
-
-
-% Python has been one of the fastest growing languages in the computer science industry \cite{article_python_growing_language}.
-
-
-\paragraph{Review Compiled vs Interpreted Language}
-
-Source \cite{article_compiled_interpreted_hybrid_languages}
-
-\paragraph{Review of Deep Learning Framework Debt}
-
-Source \cite{article_deep_learning_framework_debt}
-
-\paragraph{Review of Convolutional Neural Networks Survey}
-
-Source \cite{article_cnn_survey}
-
-\paragraph{Review of performance analysis of GPU CNN}
-
-Source \cite{article_performance_analysis_gpu_cnn}
-
-\paragraph{Summarize the problem statement}
-
-\paragraph{Discuss what this paper explores}
+\paragraph{}
+Even in popular machine learning libraries, there are often times shortcuts or bugs that developers have not yet gotten to \cite{article_deep_learning_framework_debt}.
 
 
 \section{Methods}
 
-\paragraph{Initial Discussion of Methods}
-
+\paragraph{} 
 To test the performance difference between manual implementations and the TensorFlow library, an identical algorithm was implemented in multiple different frameworks and languages.
 This includes CUDA \cite{lib_cuda}, which runs on the GPU, TensorFlow \cite{lib_tensorflow}, which runs on either the GPU or CPU, and Rust \cite{lang_rust}, which acts as the CPU implementation.
 While identical algorithms were not feasable to implement during the alloted time frame, each algorithm attempts to be as fast is it can be for the particular framework.
 The algorithm chosen is a simple back-propagation neural network.
 This allows for experimenting with the number of variables and size of the network, as well as the number of observations being concurrently processed at once.
 
-\paragraph{Experiment design}
+To make each process fair, the algorithms are fed the exact same set of values and data.
+Initially, the algorithms will build the neural network using pre-randomized weights and biases.
+Then, a bootstrapped set of observations is fed into the network, along with the label to train off of.
+This process repeats for various combinations of variable counts, or the number of variables in the input vector, and observation counts, or the number of concurrent observations being proessed at one time.
 
-\begin{itemize}
-	\item Discuss generated data
-	\item Mention hardware used to test methods. Especially with WSL
-	\item Discuss the parameters (number of iterations, sizes, etc) used for the data presented
-	\item Either here or in every section discuss what is measured (loading data into GPU is not)
-\end{itemize}
-
-\paragraph{Data Generation}
-
-How the data is generated (with the Python script)
-\begin{itemize}
-	\item Parameters / Configuration
-	\item Sending it to files to be parsed by the implementations
-	\item Discuss the scripts used to iteratively pass the data as environment parameters to each model (either here or in prior section)
-\end{itemize}
-
-\paragraph{Rust Implementation}
-
-\begin{itemize}
-	\item Custom implementation of back propagation (Unsure how far into detail I'll go here)
-	\item Parallelized using Rayon \cite{lib_rayon} over observations (key point for discussion)
-\end{itemize}
-
-\paragraph{CUDA Implementation}
+\paragraph{Rust}
+The Rust \cite{lang_rust} implementation acts as the manual CPU implementation.
+It uses the Rust standard libraries along with the Rayon crate, which provides APIs to simplify multi-threading Rust appl
 
 
-\begin{itemize}
-	\item Implements a similar version to Rust's back propagation but slightly different
-	\item Is multithreaded across all dimensions, including both the number of variables and the number of observations (Note: get better labels for these?)
-\end{itemize}
+\paragraph{CUDA}
+Using \CC  \cite{lang_c++} and CUDA \cite{lib_cuda}.
 
-\paragraph{Python (TensorFlow) implementation}
-
-\begin{itemize}
-	\item Network is built using variable tensors
-	\item TensorFlow allows manually overriing the avalilable GPUs, so the TensorFlow implementation is used on both the GPU and CPU
-\end{itemize}
-
-
-\paragraph{Analysis Stage}
-
-
-\begin{itemize}
-	\item Data compounded into single dataset using bash script
-	\item Data then loaded into R \cite{lang_r} and graphed using ggplot2 \cite{lib_ggplot2}.
-\end{itemize}
+\paragraph{TensorFlow}
+Using Python \cite{lang_python} and TensorFlow \cite{lib_tensorflow}.
 
 \section{Results}
 
-Yes, the figures need to be fixed
+\section{Discussion}
 
-\begin{figure}
-	\begin{center}
-		\includesvg[width=0.8\linewidth]{svg/variables.svg}
-	\end{center}
-	\caption{Model training based on the variable count... (FINISH)}
-\end{figure}
-
-\begin{figure}
-	\begin{center}
-		\includesvg[width=0.8\linewidth]{svg/bootstraps.svg}
-	\end{center}
-	\caption{Model Training based on the observation size}
-\end{figure}
-
-\section{Discussion (and conclusion, but may push conclusion to separate section)}
-
-Points to discuss:
-
-\begin{itemize}
-	\item Significant difference between CUDA and Tensorflow Performance
-	\item Difference between TensorFlow and Rust implementations (Additional performance can still be gained in CPU implementation)
-	\item Multithreading across observations was in all algorithms, so observation size did  not affect the runtime as much as the variable count
-	\item Discuss that some of the difference between TensorFlow and CUDA is due to Python. additional exploration could include implementing TensorFlow (in Rust with their Rust bindings, or in C++)
-	\item Discuss the amount of time needed to implement CUDA vs TensorFlow, maybe Rust but that sortof fell inbetween the two
-\end{itemize}
 
 \section{Conclusion}
-
-\begin{itemize}
-	\item TensorFlow excels at quick implementation and testing, and does it well enough
-	\item However, in production for time-critical applications, manual implementations out-perform by a long shot.
-	\item Sortof like a tradeoff between time spent in implementation and time spent in experimentation
-\end{itemize}
-
 
 \newpage
 \bibliographystyle{ieeetr}
