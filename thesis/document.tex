@@ -247,6 +247,68 @@ However, the increase is significantly lower than those shown in Figure \ref{fig
 
 \section{Discussion}
 
+\paragraph{}
+To start off with the least significant results. In Figure \ref{fig:graph:observations}, it shows that only the TensorFlow on CPU implementation had any change at all when the number of concurrent observations increased, and even then it is not too significant.
+This makes sense given the way that each handles parallelizing the executions.
+Rust, for starters, specifically only parallelizes across observations using the Rayon \cite{lib_rayon} crate.
+That is, it should be expected that adding more observations per iteration wouldn't have too much of a difference in the runtime.
+CUDA, similarly, also parallelizes across observations.
+Thus, CUDA also doesn't significantly change its runtime when adding additional variables. 
+The same can be said with the GPU implementation of TensorFlow, since the GPU parallelizes across observations naturally.
+However, the same cannot be definitely said in the CPU implementation of TensorFlow.
+The detailing of the implementation of TensorFlow was not within the context of this paper, so it cannot be stated whether or not it parallelizes on the CPU.
+However, it should be noted that it still performed faster than Rust, indicating that there are several methods of optimizations that have been used to push its performancce as far as it can.
+
+\paragraph{} % CPU increase exponentially, GPU don't increase as much. Discuss how the variable count significantly impacts the size of the network, and how the parallelization acorss variables is important
+One of the significant differences between the CPU implementations and GPU implementations is the effects of larger number of variables, and by extension size of the neural network.
+This type of effect wasn't as noticeable in Figure \ref{fig:graph:observations} because the number of observations only has an effect on the number of concurrent observations fed into the network at the same time, while the number of variables affects every layer in the network's size.
+In Figure \ref{fig:graph:variables}, it's very noticeable the difference between CUDA and TensorFlow GPU, and TensorFlow CPU and Rust.
+Since the two GPU implementations handle parallelization of the variables in addition to the parallelization of observations, they are able to take more variables before slowing down even more.
+However, since the CPU doesn't have the same ability of parallelization that the GPU has, we notice an exponential relationship between the number of variables and the average runtime of the algorithm.
+While it might be possible to parallelize over variables on the CPU as it does in the GPU, it may have significant drawbacks, since the CPU has significantly less multithreading ability than the GPU.
+As far as hardware is concerned, it can be concluded that the use of GPU to parallelize as much as possible provides significant improvements in performance.
+
+\paragraph{} % Rust vs CPU Tensorflow
+While both of the CPU implementations, Rust and Tensorflow CPU, had exponential relationships between variable count and average runtime, the TensorFlow implementation had a significantly slower increase.
+Albeit the implementation of Rust was very basic and bare-bones, it still was fully compiled and fighting against a model implemented in an interpreted language.
+At some points, the TensorFlow implementation on the CPU performed up to 100x faster than the Rust implementation.
+While exploring the underlying technology behind TensorFlow's CPU implementation was out of scope for this paper, there are obviously several levels of optimization that TensorFlow has for CPU operations.
+Is it possible for someone who is knowledgeable about these optimizations to out-perform TensorFlow? Definitely.
+There is still the level of optimizations that can be gained simply by avoiding interpreted languages like Python \cite{article_compiled_interpreted_hybrid_languages}.
+However, for a basic user looking to create and run models without too much deep-level knowledge, TensorFlow provides significant power to users working on a CPU.
+
+
+\paragraph{} % CUDA vs TensorFlow GPU
+The other pair of implementations to compare is the CUDA and TensorFlow on the GPU.
+As shown in Figure \ref{fig:graph:variables}, there is a significant performance difference between the two implementations.
+Across a wide range of variable counts, the CUDA implementation performed 1,000s times faster than the TensorFlow GPU implementation.
+The only time where this wasn't the case was near the beginning, when there was a low variable count, and the runtime of CUDA was for some unknown reason closer to the other implementations.
+However, it still doesn't change the significant lead that CUDA has against TensorFlow GPU.
+There could be several reasons why this might be the case.
+First, CUDA is a compiled language, and thus would naturally be faster than an interpreted language like Python running TensorFlow \cite{article_compiled_interpreted_hybrid_languages}.
+Second, and more importantly, there might be a significant amount of overhead that TensorFlow includes.
+TensorFlow takes a unique approach to their implementations. In order to make TensorFlow work on different infrastructures, and work for many different applications, an execution graph is generated to keep track of where values go.
+When running, the execution graph first has to be generated, based on the operations made within the code.
+Then, several optimization passes are run in order to attempt to improve the performance of the model.
+However, these optimization passes can't be too specific or intense, as this is all running during execution.
+Additionally, TensorFlow is a large library and has gone through several changes and accumulated a decent amount of technical debt \cite{article_deep_learning_framework_debt}.
+Thus, there might be several possible optimization techniques that have not yet been implemented.
+This makes TensorFlow even slightly slower than manual implementations.
+On the contrary, when writing CUDA code the optimizations and execution plan need to be thought about and implemented beforehand.
+This can be very complicated for developers that may not fully understand the strengths and weaknesses of working with CUDA.
+However, once done the code can be run multiple times with significantly faster performance, as it does not need to handle optimizations or missing features during execution time.
+
+
+\paragraph{} % Implementation Time
+Execution time isn't the only factor in deciding what tools to use in a project.
+While yes, manually implementing the algorithm in CUDA may out-perform TensorFlow, it requires a significant amount of knowledge.
+During this project, implementing CUDA was one of the more difficult tasks.
+Writing the Python code to implement both TensorFlow implementations took only a few hours, if not less.
+However, CUDA took several days of planning out array indexing, grasping how CUDA managed data and parallelization, and bringing all the pieces together to a working algorithm
+Even the Rust implementation took some time to get together, as it also required prior knowledge and experience with how back propagation works.
+It should also be noted that implementing TensorFlow only needed to be written in Python once, and then it could be executed on either the GPU or CPU efficiently.
+By creating an operation graph, the developers for TensorFlow are able to manually write separate code that uses the strengths and weaknesses of the architecture it runs on.
+
 
 % Points to discuss:
 %
@@ -254,18 +316,40 @@ However, the increase is significantly lower than those shown in Figure \ref{fig
 % 	\item Significant difference between CUDA and Tensorflow Performance
 % 	\item Difference between TensorFlow and Rust implementations (Additional performance can still be gained in CPU implementation)
 % 	\item Multithreading across observations was in all algorithms, so observation size did  not affect the runtime as much as the variable count
-% 	\item Discuss that some of the difference between TensorFlow and CUDA is due to Python. additional exploration could include implementing TensorFlow (in Rust with their Rust bindings, or in C++)
 % 	\item Discuss the amount of time needed to implement CUDA vs TensorFlow, maybe Rust but that sortof fell inbetween the two
 % \end{itemize}
 
+
 \section{Conclusion}
 
-% \begin{itemize}
-% 	\item TensorFlow excels at quick implementation and testing, and does it well enough
-% 	\item However, in production for time-critical applications, manual implementations out-perform by a long shot.
-% 	\item Sortof like a tradeoff between time spent in implementation and time spent in experimentation
-% \end{itemize}
-%
+\paragraph{}
+While manually implementing may provide significant performance improvements, the answer isn't so clear.
+Manually implementing algorithms takes a deep level of knowledge of the algorithm itself, as well as the infrastructure that the algoritm is implemented on.
+It also may take significantly longer to build, and may need to be scrapped any time there is a small change in the architecture of the model.
+TensorFlow, however, paired with Python provides easy access to ``good-enough'' implementations that get the job done, and provides significant ease of development.
+Small changes in the architecture can likely be handled by TensorFlow, with little changes needing to be made to the code itself.
+
+\paragraph{}
+Therefore, a balance has to be made between the two.
+In situations where the model is rapidly changing and needs to be utilized as soon as possible, TensorFlow and other libraries provide amazing tooling and capabilities to make it happen.
+However, in time-critical situations or more stable environments, especially those that allow the extra time needed to implement it, manually implementing the model has its beneifts too.
+In some teams or companies, a combination might be found, where the development team builds the model using TensorFlow or other libraries, and then that is converted into a more low-level program by more experienced teams.
+
+\paragraph{}
+It should be noted that this project isn't fully encapsulating, and there is still work that can be done in the future.
+First, it should be noted that the span of varaibles and observations recorded in this project are reduced in order to run within a reasonable time-frame.
+Any larger spans would cause the experiment to take days or even weeks to run through every combination it needs to.
+Additionally, the Rust implementation could gain significant improvements.
+It should be feasable to build a Rust implementation that is comparable to or faster than the TensorFlow when run on the CPU.
+Lastly, more research into the underlying technology of TensorFlow, as well as expanding this project to other libraries such as PyTorch, would expand the depth that conclusions can go as to the overhead of these libraries.
+
+\paragraph{}
+In conclusion, the answer isn't clear.
+Python, in tandem with TensorFlow, provides the ability to rapidly prototype and easily implement complex algorithms with only a few lines.
+CUDA, and other low-level languages, provide the ability to plan out and create programs that utilizes the strengths and weaknesses of the hardware to its fullest potential, without the overhead of generalized libraries.
+Thus, it shouldn't be stated that using libraries are better than writing manually or vice versa, but rather that they are different approaches and each have their place in the field.
+
+
 
 \newpage
 \bibliographystyle{ieeetr}
