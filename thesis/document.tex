@@ -30,6 +30,12 @@
 \section{Introduction}
 
 \paragraph{Intro Paragraph}
+Machine learning is a quickly-growing industry with the recent boom of generative AI.
+Many companies and organizations are quickly trying to use these machine learning frameworks for their own purposes.
+However, these models are expensive, and can quickly spike up server cost to run.
+These machine learning implementations are often using libraries such as TensorFlow \cite{lib_tensorflow} and PyTorch \cite{lib_pytorch} are often considered the standard for performing more complicated machine learning tasks.
+These libraries handle a significant amount of the underlying methods used, and provide the ability to even utilize a GPU if it has the correct framework.
+However, these libraries are mainly interacted with through the Python language \cite{lang_python}, which is often noted to be a slow language.
 
 \paragraph{Review of Python as a growing language / use in Data Science}
 
@@ -43,30 +49,51 @@ The only drawback to Python is that it sacrifices speed for the ability to be as
 This can be partially mitigated, as Python allows building Python libraries from \CC  or other languages.
 However, this doesn't fully eradicate the drawbacks to a dynamically typed interpreted language.
 
-
-% Python has been one of the fastest growing languages in the computer science industry \cite{article_python_growing_language}.
-
-
 \paragraph{Review Compiled vs Interpreted Language}
 
-Source \cite{article_compiled_interpreted_hybrid_languages}
+There are three general types of translation modes for programming languages; interpreted, hybrid, and compiled \cite{article_compiled_interpreted_hybrid_languages}.
+Python, and other similar languages, fall under the interpreted category.
+Interpreted languages are typically taken line by line, executed immediately.
+This allows for languages to be more portable as the interpreter interprets the inserted code, and runs machine level code based on the condition.
+Hybrid languages include languages like Java.
+The written code is first converted into byte-code, and then run on a virtual machine that can be platform dependant.
+Compiled lanugages, such as C and \CC, compile code into machine-specific instructions that can be executed as is.
+There are tradeoffs and benefits of using each these translation modes.
+Interpreted and Hybrid languages are highly portable, as they rely on a virtual machine or the interpreter to convert code to device instructions.
+However, they sacrifice execution time as additional checks and parsing happens when the program executes.
+Compiled languages, however, are typically more strict with syntax, but they provide significantly better runtime performance than interpreted or hybrid languages.
+That is to say, that code written in C and \CC are typcially faster to run than Python, but may be more difficult to impement or iterate on because of the language syntax and patterns.
 
 \paragraph{Review of Deep Learning Framework Debt}
 
-Source \cite{article_deep_learning_framework_debt}
+Libraries are pre-built collections of code that make it easier for developers to implement and perform certain tasks.
+Often times, libraries are generalized to be used in a multitude of situations.
+Thus, it's also important that these libraries are as efficient as they can be.
+A recent study took a particular look into popular deep learning libraries, such as TensorFlow and PyTorch, and inspected the comments that indicate technical debt existing in the code \cite{article_deep_learning_framework_debt}.
+The researchers categorized these indications of technical debt into categories; design debt, defect debt, documentation debt, test debt, requirement debt, compatability debt, and algorithm debt.
+They found that the majority of technical debt found fell under design debt, followed by requirement debt and algorithm debt.
+This indicates that there are a lot of areas within popular deep learning frameworks that the developers wish they had more time to fix, polish up, or change.
+The conclusion is that these widely used libraries aren't without defects and shortcomings.
+Thus indicating that use of these frameworks may assume some overhead.
 
-\paragraph{Review of Convolutional Neural Networks Survey}
 
-Source \cite{article_cnn_survey}
+\paragraph{Review of Neural Networks}
+
+Neural networks is a category of mathematical models under machine learning that loosely attempts to mimick the brain \cite{book_intro_neural_networks}.
+They are composed of nodes, or neurons, that accept multiple inputs from previous nodes, each value weighted by some unique weight, and outputs some value based on the inputs.
+Neural networks have the ability to drastically increase its size, in turn increasing the time it may take to run the model on a given inputs.
+The architecture of neural networks lends itself well to being represented using linear algebra, which itself lends nicely to parallelization and other optimizations.
+
+% \paragraph{Review of Convolutional Neural Networks Survey}
+% Neural networks are complicated models that are able 
 
 \paragraph{Review of performance analysis of GPU CNN}
 
-Source \cite{article_performance_analysis_gpu_cnn}
+% Source \cite{article_performance_analysis_gpu_cnn}
 
 \paragraph{Summarize the problem statement}
 
 \paragraph{Discuss what this paper explores}
-
 
 \section{Methods}
 
