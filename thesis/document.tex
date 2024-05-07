@@ -5,6 +5,8 @@
 \usepackage{setspace}
 \usepackage{svg}
 
+\graphicspath{{../out/graphs/}}
+
 \doublespacing
 
 \author{Thomas Kwashnak}
@@ -207,7 +209,8 @@ It is then loaded into R \cite{lang_r} and graphed using the R libary ggplot2 \c
 
 \begin{figure}
 	\begin{center}
-		\includesvg[width=0.8\linewidth]{svg/variables.svg}
+		\includegraphics[width=0.9\linewidth]{variables.png}
+		% \includesvg[width=0.8\linewidth]{svg/variables.svg}
 	\end{center}
 	\caption{Average time taken to run through one iteration of back propagation based on the number of variables. Time is on a $\log_{10}$ scale. Lines show trends in the data, using ggplot2 geom\_smooth \cite{lib_ggplot2}.}
 	\label{fig:graph:variables}
@@ -215,7 +218,8 @@ It is then loaded into R \cite{lang_r} and graphed using the R libary ggplot2 \c
 
 \begin{figure}
 	\begin{center}
-		\includesvg[width=0.8\linewidth]{svg/bootstraps.svg}
+		\includegraphics[width=0.9\linewidth]{bootstraps.png}
+		% \includesvg[width=0.8\linewidth]{svg/bootstraps.svg}
 	\end{center}
 	\caption{Average time taken to run through one iteration of back propagation based on the number of concurrent observations processed at a time. Time is on a $\log_{10}$ scale. Lines show trends in the data, using ggplot2 geom\_smooth \cite{lib_ggplot2}.}
 	\label{fig:graph:observations}
