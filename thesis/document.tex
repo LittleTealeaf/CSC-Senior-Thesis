@@ -309,17 +309,6 @@ Even the Rust implementation took some time to get together, as it also required
 It should also be noted that implementing TensorFlow only needed to be written in Python once, and then it could be executed on either the GPU or CPU efficiently.
 By creating an operation graph, the developers for TensorFlow are able to manually write separate code that uses the strengths and weaknesses of the architecture it runs on.
 
-
-% Points to discuss:
-%
-% \begin{itemize}
-% 	\item Significant difference between CUDA and Tensorflow Performance
-% 	\item Difference between TensorFlow and Rust implementations (Additional performance can still be gained in CPU implementation)
-% 	\item Multithreading across observations was in all algorithms, so observation size did  not affect the runtime as much as the variable count
-% 	\item Discuss the amount of time needed to implement CUDA vs TensorFlow, maybe Rust but that sortof fell inbetween the two
-% \end{itemize}
-
-
 \section{Conclusion}
 
 \paragraph{}
